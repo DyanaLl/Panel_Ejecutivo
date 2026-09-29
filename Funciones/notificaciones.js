@@ -3,11 +3,11 @@ const EMAILJS_CONFIG = {
     SERVICE_ID: "service_sbvs893",    // Tu Service ID
     TEMPLATE_ID: "template_gffiwwf",   // Tu Template ID
     PUBLIC_KEY: "-Ed9Y1UQA95iBMfTZ",   // Tu Public Key
-    CORREO_DESTINO: "foxandinaec@gmail.com" 
+    CORREO_DESTINO: "foxandinaec@gmail.com"
 };
 
 // Inicializar EmailJS con la clave pública
-(function() {
+(function () {
     if (typeof emailjs !== "undefined") {
         emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
     }
@@ -31,12 +31,17 @@ function verificarYEnviarNotificacionesPolizas(listaPolizas) {
     const notificacionesEnviadas = JSON.parse(sessionStorage.getItem("notificaciones_enviadas") || "{}");
 
     listaPolizas.forEach(p => {
+        const estadoNorm = String(p.estadoPoliza || "").toLowerCase();
+        // 🛑 Si la póliza ya fue Renovada, Cancelada o Gestionada, no enviar correos
+        if (estadoNorm.includes("renovad") || estadoNorm.includes("cancelad")) {
+            return;
+        }
         const fechaFinStr = p.finVigencia || p.fechaFin;
         if (!fechaFinStr) return;
 
         // Convertir string de fecha a objeto Date
         const fechaFin = new Date(fechaFinStr + "T00:00:00");
-        
+
         // Calcular diferencia en días
         const diffTiempo = fechaFin.getTime() - hoy.getTime();
         const diasRestantes = Math.round(diffTiempo / (1000 * 3600 * 24));
@@ -46,7 +51,7 @@ function verificarYEnviarNotificacionesPolizas(listaPolizas) {
 
         // Evaluar solo si faltan exactamente 10, 5 o 0 días
         if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
-            
+
             // Crear una clave única para no enviar múltiples veces el mismo día la misma alerta
             const fechaHoyStr = hoy.toISOString().split("T")[0];
             const claveNotificacion = `${numPoliza}_${diasRestantes}_${fechaHoyStr}`;
@@ -59,12 +64,13 @@ function verificarYEnviarNotificacionesPolizas(listaPolizas) {
             // Construir los parámetros del correo de acuerdo a los días
             let datosCorreo = {
                 to_email: EMAILJS_CONFIG.CORREO_DESTINO,
+                id_firebase: p.idFirebase,
                 nombre_cliente: clienteNombre,
                 tipo_seguro: p.tipoPoliza || p.tipoSeguro || "-",
                 aseguradora: p.aseguradora || "-",
                 numero_poliza: numPoliza,
                 placa_detalle: p.placaDetalle || p.placa || p.detalle || "-",
-                fin_vigencia: fechaFinStr
+                fin_vigencia: fechaFinStr,
             };
 
             if (diasRestantes === 10) {

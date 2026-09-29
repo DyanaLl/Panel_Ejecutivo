@@ -23,7 +23,7 @@ function cargarPolizasGuardadas() {
         if (typeof renderizarHistorialCompleto === "function") renderizarHistorialCompleto();
         if (typeof renderizarResumenGeneral === "function") renderizarResumenGeneral();
         if (typeof renderizarGraficoMovimiento === "function") renderizarGraficoMovimiento();
-        
+
         // Analiza si alguna poliza esta próxima a vencer 10-5-0 días 
         if (typeof verificarYEnviarNotificacionesPolizas === "function") verificarYEnviarNotificacionesPolizas(polizas);
 
@@ -33,6 +33,37 @@ function cargarPolizasGuardadas() {
 }
 // Iniciar la escucha al cargar el archivo
 cargarPolizasGuardadas();
+
+// PROCESAR ACCIÓN DE CORREO ELECTRONICO
+function procesarAccionDesdeCorreo() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const idPoliza = urlParams.get('id');
+    const accion = urlParams.get('accion');
+
+    if (idPoliza && accion) {
+        let nuevoEstado = "";
+
+        if (accion === "renovar") nuevoEstado = "Renovada";
+        if (accion === "cancelar") nuevoEstado = "Cancelada";
+
+        if (nuevoEstado !== "") {
+            db.ref("polizas/" + idPoliza).update({
+                estadoPoliza: nuevoEstado
+            }).then(() => {
+                alert(`Póliza actualizada con éxito a estado: "${nuevoEstado}". Se han desactivado las notificaciones subsecuentes.`);
+                // Limpia los parámetros de la URL sin recargar la página para evitar repetidos alert al refrescar
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }).catch((error) => {
+                console.error("Error al actualizar la póliza desde la URL del correo:", error);
+            });
+        }
+    }
+}
+
+// Escuchar si la página abrió por medio de un clic desde el correo
+document.addEventListener("DOMContentLoaded", () => {
+    procesarAccionDesdeCorreo();
+});
 
 // 1. REGISTRAR NUEVA PÓLIZA
 function registrarPoliza() {
@@ -384,7 +415,8 @@ function construirFilasTabla(lista) {
         const estadoNorm = String(p.estadoPoliza).toLowerCase();
 
         if (estadoNorm.includes("activo")) claseEstado = "badge-activo";
-        else if (estadoNorm.includes("vencid")) claseEstado = "badge-vencido";
+        else if (estadoNorm.includes("renovad")) claseEstado = "badge-activo";
+        else if (estadoNorm.includes("vencid") || estadoNorm.includes("cancelad")) claseEstado = "badge-vencido";
 
         return `
             <tr>
@@ -454,8 +486,8 @@ function renderizarHistorialCompleto() {
         let claseEstado = "badge-pendiente";
         const estadoNorm = String(p.estadoPoliza).toLowerCase();
 
-        if (estadoNorm.includes("activo")) claseEstado = "badge-activo";
-        else if (estadoNorm.includes("vencid")) claseEstado = "badge-vencido";
+        if (estadoNorm.includes("activo") || estadoNorm.includes("renovad")) claseEstado = "badge-activo";
+        else if (estadoNorm.includes("vencid") || estadoNorm.includes("cancelad")) claseEstado = "badge-vencido";
 
         return `
             <tr>
@@ -512,14 +544,20 @@ function renderizarResumenGeneral() {
         let activos = 0;
         let porVencer = 0;
         let vencidos = 0;
+        let renovadas = 0;
+        let canceladas = 0;
 
         polizasDelTipo.forEach(p => {
             const estado = String(p.estadoPoliza).toLowerCase();
-            if (estado.includes("activo") || estado.includes("vigente")) {
+            if (estado === "renovada" || estado.includes("renovad")) {
+                renovadas++;
+            } else if (estado === "cancelada" || estado.includes("cancelad")) {
+                canceladas++;
+            } else if (estado.includes("activo") || estado.includes("vigente")) {
                 activos++;
             } else if (estado.includes("próximo") || estado.includes("proximo") || estado.includes("pendiente")) {
                 porVencer++;
-            } else if (estado.includes("vencid") || estado.includes("cancelad")) {
+            } else if (estado.includes("vencid")) {
                 vencidos++;
             }
         });
@@ -538,6 +576,14 @@ function renderizarResumenGeneral() {
                 <td>
                     <span class="badge badge-vencido contador-interactivo" 
                           onclick="abrirModalDetalle('${tipo}', 'Vencido')">${vencidos}</span>
+                </td>
+                <td>
+                    <span class="badge badge-activo contador-interactivo" 
+                          onclick="abrirModalDetalle('${tipo}', 'Renovada')">${renovadas}</span>
+                </td>
+                <td>
+                    <span class="badge badge-vencido contador-interactivo" 
+                          onclick="abrirModalDetalle('${tipo}', 'Cancelada')">${canceladas}</span>
                 </td>
             </tr>
         `;

@@ -243,6 +243,10 @@ function abrirModalDetalle(tipoSeguro, estadoFiltro) {
             return estado.includes("próximo") || estado.includes("proximo") || estado.includes("pendiente");
         } else if (estadoFiltro === "Vencido") {
             return estado.includes("vencid") || estado.includes("cancelad");
+        } else if (estadoFiltro === "Renovada") {
+            return estado.includes("renovad");
+        } else if (estadoFiltro === "Cancelada") {
+            return estado.includes("cancelad");
         }
         return false;
     });
