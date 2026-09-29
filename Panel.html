@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Ejecutivo - Foxandina</title>
+    <link rel="stylesheet" href="estilos.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- (SIDEBAR) -->
+    <aside class="sidebar-lateral">
+        <nav class="menu-lateral">
+            <a href="#" class="item-menu" data-pantalla="pantalla-inicio" title="Inicio">
+                <i class="fa-solid fa-house"></i>
+            </a>
+            <a href="#" class="item-menu active" data-pantalla="pantalla-registro" title="Nuevo Registro">
+                <i class="fa-solid fa-plus"></i>
+            </a>
+            <a href="#" class="item-menu" data-pantalla="pantalla-vencimientos" title="Vencimientos">
+                <i class="fa-solid fa-clock"></i>
+            </a>
+            <a href="#" class="item-menu" data-pantalla="pantalla-historial" title="Historial Completo">
+                <i class="fa-solid fa-list-check"></i>
+            </a>
+            <a href="#" class="item-menu" data-pantalla="pantalla-resumen" title="Resumen General">
+                <i class="fa-solid fa-table-cells"></i>
+            </a>
+            <a href="#" class="item-menu" data-pantalla="pantalla-grafica" title="Gráficas Estadísticas">
+                <i class="fa-solid fa-chart-column"></i>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="contenedor-principal">
+
+        <!-- Modal de Inicio de Sesión -->
+        <div id="loginModal" class="login-modal-overlay">
+            <div class="login-modal-card">
+                <h2 class="login-title">Acceso al Sistema - Foxandina </h2>
+
+                <div class="login-form-group">
+                    <label for="loginEmail" class="login-label">Correo electrónico</label>
+                    <input type="email" id="loginEmail" class="login-input" placeholder="usuario@dominio.com">
+                </div>
+
+                <div class="login-form-group">
+                    <label for="loginPassword" class="login-label">Contraseña</label>
+                    <input type="password" id="loginPassword" class="login-input" placeholder="••••••••">
+                </div>
+
+                <button id="btnLoginSubmit" class="login-btn-submit" onclick="ejecutarLogin()">
+                    Ingresar
+                </button>
+
+                <p id="loginError" class="login-error-msg"></p>
+            </div>
+        </div>
+
+        <!-- PANTALLA INICIO -->
+        <section id="pantalla-inicio" class="pantalla-modulo">
+
+            <!-- Encabezado-logo-->
+            <header class="encabezado-dashboard">
+                <div class="encabezado-texto">
+                    <h1>FOXANDINA</h1>
+                    <p>Panel Ejecutivo de Gestión de Pólizas</p>
+                </div>
+                <div class="encabezado-linea-vertical"></div>
+            </header>
+
+            <!-- Barra de Búsqueda Global -->
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="inputBusquedaGlobal"
+                        placeholder="Buscar por cliente, N° póliza, aseguradora, tipo de seguro, placa, fecha..."
+                        onkeyup="buscarPolizasGlobales()">
+                    <button id="btnClearSearch" onclick="limpiarBusquedaGlobal()" style="display: none;">✕</button>
+                </div>
+            </div>
+
+            <!-- Contenedor de Resultados de Búsqueda (Oculto por defecto) -->
+            <div id="seccionResultadosBusqueda" class="results-search-container" style="display: none;">
+                <div class="results-card">
+                    <h3 id="tituloResultadosBusqueda">Resultados de la Búsqueda</h3>
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>CLIENTE</th>
+                                    <th>TIPO / ASEGURADORA</th>
+                                    <th>N° PÓLIZA</th>
+                                    <th>PLACA / DETALLE</th>
+                                    <th>INICIO VIGENCIA</th>
+                                    <th>FIN VIGENCIA</th>
+                                    <th>ESTADO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaResultadosBusquedaBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-dashboard">
+
+                <!-- COLUMNA IZQUIERDA -->
+                <div class="columna-dashboard">
+
+                    <!-- Registro -->
+                    <!-- Pólizas por Vencer -->
+                    <div class="tarjeta-dashboard">
+                        <h2>Pólizas por Vencer</h2>
+
+                        <div class="seccion-tabla-corta">
+                            <h3>Vencen Este Mes</h3>
+                            <div class="contenedor-tabla">
+                                <table class="tabla-dashboard-ancho">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Tipo / Aseguradora</th>
+                                            <th>N° Póliza</th>
+                                            <th>Fin Vigencia</th>
+                                            <th>Días Restantes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-vencen-este-mes-inicio"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="seccion-tabla-corta separador-bloque-tabla">
+                            <h3>Vencen el Próximo Mes</h3>
+                            <div class="contenedor-tabla">
+                                <table class="tabla-dashboard-ancho">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Tipo / Aseguradora</th>
+                                            <th>N° Póliza</th>
+                                            <th>Fin Vigencia</th>
+                                            <th>Días Restantes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-vencen-proximo-mes-inicio"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica Estadística -->
+                    <div class="tarjeta-dashboard">
+                        <h4>Análisis Visual de Movimiento</h4>
+                        <div class="contenedor-grafico">
+                            <canvas id="graficoInicio"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUMNA DERECHA -->
+                <div class="columna-dashboard">
+
+                    <!-- Tabla de Resultados + Botón Ver Historial -->
+                    <div class="tarjeta-dashboard">
+                        <div class="encabezado-tarjeta-flex">
+                            <h2>Tabla de Resultados</h2>
+                            <button type="button" class="btn-verde-historial" id="btn-ir-historial">
+                                Ver Historial Completo
+                            </button>
+                        </div>
+
+                        <div class="contenedor-tabla">
+                            <table class="tabla-dashboard-ancho tabla-resumen-ejecutivo">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo de Seguro</th>
+                                        <th>Activos</th>
+                                        <th>Por Vencer</th>
+                                        <th>Vencidos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-resumen-general-inicio"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TABLA DE REGISTRO -->
+        <section id="pantalla-registro" class="pantalla-modulo pantalla-oculta">
+            <h2>Registro de Pólizas</h2>
+
+            <form id="form-registro-polizas">
+
+                <!-- Tipo de Póliza y Aseguradora -->
+                <div class="grupo-formulario">
+                    <label for="tipoPoliza">Tipo de Póliza</label>
+                    <select id="tipoPoliza">
+                        <option value="">-- Selecciona un tipo --</option>
+                        <option value="Vehículos Livianos">Vehículos Livianos</option>
+                        <option value="Vehículos Pesados">Vehículos Pesados</option>
+                        <option value="Responsabilidad Civil">Responsabilidad Civil</option>
+                        <option value="Accidentes Personales">Accidentes Personales</option>
+                        <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
+                        <option value="Equipo Electrónico">Equipo Electrónico</option>
+                        <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas</option>
+                        <option value="Incendio">Incendio</option>
+                        <option value="Multiriesgo">Multiriesgo</option>
+                        <option value="Vida Individual">Vida Individual</option>
+                    </select>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="aseguradora">Aseguradora</label>
+                    <select id="aseguradora">
+                        <option value="">-- Selecciona una aseguradora --</option>
+                        <option value="Latina">Latina</option>
+                        <option value="EquiSuiza">EquiSuiza</option>
+                        <option value="Sweaden">Sweaden</option>
+                        <option value="Alianza">Alianza</option>
+                        <option value="Atlantida">Atlantida</option>
+                        <option value="Zurich">Zurich</option>
+                        <option value="Privilegio CIA">Privilegio CIA</option>
+                        <option value="Aseguradora del Sur">Aseguradora del Sur</option>
+                    </select>
+                </div>
+
+                <!-- Cliente y Cédula/RUC -->
+                <div class="grupo-formulario">
+                    <label for="cliente">Cliente</label>
+                    <input type="text" id="cliente" placeholder="Nombre completo">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="cedulaRuc">Cédula o RUC</label>
+                    <input type="text" id="cedulaRuc" placeholder="Ej. 1723456789001">
+                </div>
+
+                <!-- Teléfono y Correo Electrónico -->
+                <div class="grupo-formulario">
+                    <label for="telefonoCliente">Teléfono</label>
+                    <input type="tel" id="telefonoCliente" placeholder="Ej. 0991234567">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="emailCliente">Correo Electrónico</label>
+                    <input type="email" id="emailCliente" placeholder="Ej. cliente@email.com">
+                </div>
+
+                <!-- Número de Póliza y Placa/Información -->
+                <div class="grupo-formulario">
+                    <label for="numeroPoliza">Número de Póliza</label>
+                    <input type="text" id="numeroPoliza">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="placaDetalle">Placa o Información</label>
+                    <input type="text" id="placaDetalle" placeholder="Ej. PBC-1234 / Detalle general">
+                </div>
+
+                <!-- Inicio Vigencia y Fin Vigencia -->
+                <div class="grupo-formulario">
+                    <label for="inicioVigencia">Inicio Vigencia</label>
+                    <input type="date" id="inicioVigencia">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="finVigencia">Fin Vigencia</label>
+                    <input type="date" id="finVigencia">
+                </div>
+
+                <!-- Código y Estado -->
+                <div class="grupo-formulario">
+                    <label for="codigoPoliza">Código</label>
+                    <input type="text" id="codigoPoliza" placeholder="Ej. COD-001">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="estadoPoliza">Estado</label>
+                    <select id="estadoPoliza">
+                        <option value="Activo">Activo</option>
+                        <option value="Próximo a vencer">Próximo a vencer</option>
+                        <option value="Vencido">Vencido</option>
+                    </select>
+                </div>
+
+                <!-- Botones de Acción y Subtextos Informativos -->
+                <div class="contenedor-acciones">
+                    <div class="bloque-boton">
+                        <button type="button" id="btn-registrar">Registrar nuevo cliente</button>
+                        <small>Agrega un nuevo cliente al historial.</small>
+                    </div>
+
+                    <div class="bloque-boton">
+                        <button type="button" id="btn-actualizar">Actualizar póliza</button>
+                        <small>Selecciona primero una póliza de la tabla para modificarla.</small>
+                    </div>
+
+                    <div class="bloque-boton">
+                        <button type="button" id="btn-exportar">Exportar Excel</button>
+                        <small>Descarga el historial completo.</small>
+                    </div>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- PÓLIZAS QUE VENCEN ESTE MES -->
+        <section id="pantalla-vencimientos" class="pantalla-modulo pantalla-oculta">
+            <h2>Pólizas por Vencer</h2>
+
+            <!-- Tabla 1: Vencen este mes -->
+            <div class="seccion-tabla">
+                <h3>Pólizas que Vencen Este Mes</h3>
+                <div class="contenedor-tabla">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Tipo Póliza</th>
+                                <th>Aseguradora</th>
+                                <th>N° Póliza</th>
+                                <th>Fin Vigencia</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-vencen-este-mes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabla 2: Vencen el próximo mes -->
+            <div class="seccion-tabla">
+                <h3>Pólizas que Vencen el Próximo Mes</h3>
+                <div class="contenedor-tabla">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Tipo Póliza</th>
+                                <th>Aseguradora</th>
+                                <th>N° Póliza</th>
+                                <th>Fin Vigencia</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-vencen-proximo-mes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- HISTORIAL COMPLETO DE PÓLIZAS -->
+        <section id="pantalla-historial" class="pantalla-modulo pantalla-oculta">
+            <h2>Historial Completo</h2>
+            <p class="subtitulo-seccion">Selecciona el tipo de seguro para ver su historial.</p>
+
+            <!-- Filtro por Tipo de Póliza -->
+            <div class="contenedor-filtro">
+                <label for="filtroTipoSeguro"><strong>Seleccionar tipo de seguro:</strong></label>
+                <select id="filtroTipoSeguro">
+                    <option value="TODOS">-- Todos los tipos de seguro --</option>
+                    <option value="Vehículos Livianos">Vehículos Livianos</option>
+                    <option value="Vehículos Pesados">Vehículos Pesados</option>
+                    <option value="Incendio">Incendio</option>
+                    <option value="Responsabilidad Civil">Responsabilidad Civil</option>
+                </select>
+            </div>
+
+            <!-- Tabla de Historial Completo -->
+            <div class="contenedor-tabla">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Cliente</th>
+                            <th>Cédula / RUC</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Aseguradora</th>
+                            <th>Tipo Póliza</th>
+                            <th>N° Póliza</th>
+                            <th>Placa / Detalle</th>
+                            <th>Inicio Vigencia</th>
+                            <th>Fin Vigencia</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-completo">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!--Tabla de Resultados-->
+        <section id="pantalla-resumen" class="pantalla-modulo pantalla-oculta">
+            <h2>Resumen General por Tipo de Póliza</h2>
+            <div class="contenedor-tabla contenedor-resumen">
+                <table class="tabla-resumen-ejecutivo">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Seguro</th>
+                            <th>Activos</th>
+                            <th>Por Vencer</th>
+                            <th>Vencidos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-resumen-general">
+                        <!-- Se llena dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!--Gráfica Estadística-->
+        <section id="pantalla-grafica" class="pantalla-modulo pantalla-oculta">
+            <h2>Análisis Visual de Movimiento por Seguro</h2>
+            <div class="contenedor-grafico">
+                <canvas id="graficoVolumenSeguros"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <!-- VENTANA FLOTANTE-Tabla de Resultados -->
+    <div id="modal-detalle-polizas" class="modal-oculto">
+        <div class="modal-contenido">
+            <div class="modal-encabezado">
+                <h3 id="modal-titulo">Detalle de Pólizas</h3>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal"
+                    onclick="cerrarModalDetalle()">&times;</button>
+            </div>
+            <div class="modal-cuerpo">
+                <div class="contenedor-tabla">
+                    <table class="tabla-dashboard-ancho">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Cliente</th>
+                                <th>Aseguradora</th>
+                                <th>Placa / Detalle</th>
+                                <th>Vigencia (Inicio - Fin)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-modal-cuerpo">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL-DETALLE COMPLETO DEL CLIENTE -->
+    <div id="modal-ficha-cliente" class="modal-flotante modal-oculto">
+        <div class="modal-contenido-ficha">
+            <div class="modal-header-ficha">
+                <h3><i class="fas fa-id-card"></i> Detalle Completo de la Póliza</h3>
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModalFichaCliente()">&times;</button>
+            </div>
+
+            <div class="modal-body-ficha">
+                <div class="grid-ficha-cliente">
+                    <div class="campo-ficha">
+                        <label>Código</label>
+                        <p id="ficha-codigo">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Cliente</label>
+                        <p id="ficha-cliente">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Cédula / RUC</label>
+                        <p id="ficha-cedula">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Teléfono</label>
+                        <p id="ficha-telefono">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Correo Electrónico</label>
+                        <p id="ficha-correo">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Aseguradora</label>
+                        <p id="ficha-aseguradora">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Tipo de Póliza</label>
+                        <p id="ficha-tipo-poliza">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>N° Póliza</label>
+                        <p id="ficha-num-poliza">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Placa / Detalle</label>
+                        <p id="ficha-placa">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Inicio Vigencia</label>
+                        <p id="ficha-inicio-vigencia">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Fin Vigencia</label>
+                        <p id="ficha-fin-vigencia">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Estado</label>
+                        <p id="ficha-estado">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer-ficha">
+                <button type="button" class="btn-secundario" onclick="cerrarModalFichaCliente()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Librería externa para exportación a Excel (XLSX) -->
+    <script src="https://unpkg.com/xlsx-js-style/dist/xlsx.bundle.js"></script>
+
+    <!-- SDKs Oficiales de Firebase (Todas en versión 10.8.0 - Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <!-- Conexión a Firebase -->
+    <script src="Funciones/firebase-config.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Archivos JavaScript de la subcarpeta funciones -->
+    <script src="Funciones/validaciones.js"></script>
+    <script src="Funciones/registro.js"></script>
+    <script src="Funciones/graficas.js"></script>
+    <script src="Funciones/notificaciones.js"></script>
+    <script src="Funciones/main.js"></script>
+
+</body>
+
+</html>
