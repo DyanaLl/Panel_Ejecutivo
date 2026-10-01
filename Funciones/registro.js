@@ -1,3 +1,25 @@
+function calcularEstadoPoliza(poliza) {
+    // Si la póliza ya fue renovada o cancelada explícitamente, se respeta ese estado
+    const estadoGuardado = String(poliza.estadoPoliza || "").toLowerCase();
+    if (estadoGuardado.includes("renovad")) return "Renovada";
+    if (estadoGuardado.includes("cancelad")) return "Cancelada";
+
+    if (!poliza.finVigencia) return poliza.estadoPoliza || "Pendiente";
+
+    // Obtener la fecha de hoy sin tomar en cuenta horas
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    // Convertir la fecha de fin de vigencia (YYYY-MM-DD)
+    const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
+
+    if (fechaFin < hoy) {
+        return "Vencida";
+    } else {
+        return "Activa";
+    }
+}
+
 // Estado global 
 let polizas = []; // Contendrá las pólizas con su ID asignado por Firebase
 let polizaSeleccionadaIndex = null;
@@ -11,9 +33,16 @@ function cargarPolizasGuardadas() {
         if (datos) {
             // Convertimos el objeto devuelto por Firebase en un arreglo con sus IDs
             Object.keys(datos).forEach((key) => {
+                const polizaOriginal = datos[key];
+                
+                // Calcula el estado actual basándonos en la fecha finVigencia
+                const estadoCalculado = calcularEstadoPoliza(polizaOriginal);
+
+                // Se guarda la póliza en la lista global con su nuevo estado calculado
                 polizas.push({
                     idFirebase: key,
-                    ...datos[key]
+                    ...polizaOriginal,
+                    estadoPoliza: estadoCalculado // Sobrescribe o asigna el estado dinámico
                 });
             });
         }
