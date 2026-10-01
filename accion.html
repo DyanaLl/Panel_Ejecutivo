@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmación de Gestión Realizada</title>
-    <!-- SDK de Firebase -->
+    <!-- SDKs de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body {
@@ -14,18 +16,26 @@
             text-align: center;
             padding: 50px;
         }
+
         .card {
             background: white;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             margin: auto;
         }
-        h2 { color: #333; }
-        p { color: #666; }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="card">
@@ -34,6 +44,8 @@
     </div>
 
     <script>
+        // TOKEN DE SEGURIDAD PRIVADO
+        const TOKEN_SECRETO = "PanelSeguro2026";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBrXWo276aRBXewRm90_H07_cpTa7Rldn0",
@@ -47,43 +59,53 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
 
-        // Leer los parámetros que vienen en la URL del correo (?id=...&accion=...)
         const urlParams = new URLSearchParams(window.location.search);
         const idFirebase = urlParams.get('id');
         const accion = urlParams.get('accion');
+        const tokenRecibido = urlParams.get('token');
 
         const titulo = document.getElementById('mensajeTitulo');
         const detalle = document.getElementById('mensajeDetalle');
 
-        if (idFirebase && accion) {
-            // Definir el nuevo estado según el botón que presionó
-            let nuevoEstado = accion === 'renovad' ? 'Renovado' : 'Cancelado';
-            if (accion === 'renovar') nuevoEstado = 'Renovado';
-            if (accion === 'cancelar') nuevoEstado = 'Cancelado';
-
-            // Actualizar directamente en la base de datos de Firebase
-            db.ref('polizas/' + idFirebase).update({
-                estadoPoliza: nuevoEstado
-            })
-            .then(() => {
-                if (nuevoEstado === 'Renovado') {
-                    titulo.textContent = "¡Renovación!";
-                    detalle.textContent = "El estado se ha actualizado correctamente y se han detenido las notificaciones automáticas. Ya puedes cerrar esta pestaña.";
-                } else {
-                    titulo.textContent = "Cancelación";
-                    detalle.textContent = "La póliza ha sido cancelada y los avisos se han detenido. Ya puedes cerrar esta pestaña.";
-                }
-            })
-            .catch((error) => {
-                console.error("Error al actualizar:", error);
-                titulo.textContent = "Ocurrió un error";
-                detalle.textContent = "No pudimos procesar tu avance en este momento. Inténtalo de nuevo más tarde.";
-            });
-        } else {
+        // Validar que existan los parámetros requeridos
+        if (!idFirebase || !accion) {
             titulo.textContent = "Enlace inválido";
             detalle.textContent = "Faltan parámetros de configuración en la dirección web.";
+        } else if (tokenRecibido !== TOKEN_SECRETO) {
+            // BLOQUEO DE SEGURIDAD
+            titulo.textContent = "Acceso Denegado";
+            detalle.textContent = "No tienes los permisos de seguridad necesarios para realizar esta acción.";
+        } else {
+            // TOKEN VÁLIDO: Autentica de forma transparente y actualiza
+            auth.signInAnonymously()
+                .then(() => {
+                    let nuevoEstado = "Renovada";
+                    if (accion === "cancelar" || accion === "cancelad") {
+                        nuevoEstado = "Cancelada";
+                    }
+
+                    return db.ref('polizas/' + idFirebase).update({
+                        estadoPoliza: nuevoEstado
+                    }).then(() => nuevoEstado);
+                })
+                .then((nuevoEstado) => {
+                    if (nuevoEstado === 'Renovada') {
+                        titulo.textContent = "¡Renovación Registrada!";
+                        detalle.textContent = "El estado de la póliza se ha actualizado a 'Renovada' correctamente y se han detenido los avisos. Ya puedes cerrar esta pestaña.";
+                    } else {
+                        titulo.textContent = "Cancelación Registrada";
+                        detalle.textContent = "La póliza ha sido marcada como 'Cancelada' y los avisos se han detenido. Ya puedes cerrar esta pestaña.";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error al procesar:", error);
+                    titulo.textContent = "Error de actualización";
+                    detalle.textContent = "No se pudo actualizar la póliza en la base de datos.";
+                });
         }
     </script>
 </body>
+
 </html>
