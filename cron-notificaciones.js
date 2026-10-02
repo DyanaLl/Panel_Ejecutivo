@@ -57,18 +57,17 @@ async function ejecutarChequeoDiario() {
     console.log("⏰ Iniciando chequeo diario de pólizas en GitHub Actions...");
 
     try {
-
-        // Objeto URL para que Node.js sí procese y envíe el parámetro ?auth=...
         const urlFirebase = new URL(FIREBASE_URL);
         const options = {
             hostname: urlFirebase.hostname,
-            path: urlFirebase.pathname + urlFirebase.search, // Incluye la ruta + el token ?auth=...
+            path: urlFirebase.pathname + urlFirebase.search,
             method: 'GET'
         };
 
         const res = await hacerPeticion(urlFirebase, options);
+
         if (res.status !== 200 || !res.body) {
-            console.log(" No se pudieron obtener las pólizas de Firebase.");
+            console.log(` No se pudieron obtener las pólizas de Firebase. (Código HTTP: ${res.status})`);
             return;
         }
 
@@ -87,7 +86,7 @@ async function ejecutarChequeoDiario() {
         const [hAno, hMes, hDia] = hoyStr.split("-").map(Number);
         const fechaHoy = new Date(hAno, hMes - 1, hDia);
 
-        console.log(` Fecha del servidor ajustada a Ecuador: ${hoyStr}`);
+        console.log(`📅 Fecha del servidor ajustada a Ecuador: ${hoyStr}`);
 
         const keys = Object.keys(datos);
         let alertasEnviadas = 0;
@@ -116,7 +115,7 @@ async function ejecutarChequeoDiario() {
             const numPoliza = p.numeroPoliza || p.numPoliza || p.poliza || "S/N";
             const clienteNombre = p.cliente || p.nombreCliente || "Cliente Registrado";
 
-            console.log(`Póliza N° ${numPoliza} (${clienteNombre}): Faltan ${diasRestantes} días (Vence: ${fechaFinStr}).`);
+            console.log(`🔍 Póliza N° ${numPoliza} (${clienteNombre}): Faltan ${diasRestantes} días (Vence: ${fechaFinStr}).`);
 
             // Evaluar alertas exactas (10, 5 o 0 días)
             if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
@@ -164,4 +163,3 @@ async function ejecutarChequeoDiario() {
         console.error(" Error inesperado durante el chequeo:", error);
     }
 }
-
