@@ -2,9 +2,9 @@ name: Reloj Diario Notificaciones Polizas
 
 on:
   schedule:
-    # 11:00 AM hora de Ecuador/Etiopía es 16:00 UTC (16 11 * * *)
-    - cron: '0 16 * * *'
-  workflow_dispatch: # Permite ejecutar la prueba manualmente si lo deseas
+    # 16:00 UTC equivale a las 11:00 AM hora de Ecuador (UTC-5)
+    - cron: "0 16 * * *"
+  workflow_dispatch: 
 
 jobs:
   ejecutar-notificaciones:
