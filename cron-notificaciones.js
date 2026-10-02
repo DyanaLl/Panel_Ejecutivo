@@ -32,12 +32,9 @@ async function enviarCorreoEmailJS(paramsTemplate) {
         service_id: EMAILJS_SERVICE_ID,
         template_id: EMAILJS_TEMPLATE_ID,
         user_id: EMAILJS_PUBLIC_KEY,
+        accessToken: EMAILJS_PRIVATE_KEY,
         template_params: paramsTemplate
     };
-
-    if (EMAILJS_PRIVATE_KEY && EMAILJS_PRIVATE_KEY !== "1msqfFPPrQ3ocoWoLmagD") {
-        payload.accessToken = EMAILJS_PRIVATE_KEY;
-    }
 
     const options = {
         hostname: 'api.emailjs.com',
