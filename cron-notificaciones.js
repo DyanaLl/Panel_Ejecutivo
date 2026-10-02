@@ -1,7 +1,7 @@
 const https = require('https');
 
 // CONFIGURACIÓN DE TUS SERVICIOS
-const FIREBASE_URL = "https://pagi-e6b7b-default-rtdb.firebaseio.com/polizas.json?auth=GcodP2EQZtnTpArRIzEsd62pVgYcbRO3M1qjlEnq";
+const FIREBASE_URL = "https://panel-ejecutivo-b2cfb-default-rtdb.firebaseio.com/polizas.json?auth=GcodP2EQZtnTpArRIzEsd62pVgYcbRO3M1qjlEnq";
 const EMAILJS_SERVICE_ID = "service_sbvs893";
 const EMAILJS_TEMPLATE_ID = "template_gffiwwf";
 const EMAILJS_PUBLIC_KEY = "-Ed9Y1UQA95iBMfTZ";
