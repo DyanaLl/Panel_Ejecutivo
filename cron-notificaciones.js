@@ -5,6 +5,7 @@ const FIREBASE_URL = "https://panel-ejecutivo-b2cfb-default-rtdb.firebaseio.com/
 const EMAILJS_SERVICE_ID = "service_sbvs893";
 const EMAILJS_TEMPLATE_ID = "template_gffiwwf";
 const EMAILJS_PUBLIC_KEY = "-Ed9Y1UQA95iBMfTZ";
+const EMAILJS_PRIVATE_KEY = "1msqfFPPrQ3ocoWoLmagD";
 const CORREO_DESTINO = "foxandinaec@gmail.com";
 
 function hacerPeticion(urlObj, options, data = null) {
@@ -25,7 +26,7 @@ function hacerPeticion(urlObj, options, data = null) {
 }
 
 async function enviarCorreoEmailJS(paramsTemplate) {
-    console.log(`📤 Enviando correo a ${paramsTemplate.to_email}...`);
+    console.log(` Enviando correo a ${paramsTemplate.to_email}...`);
 
     const payload = {
         service_id: EMAILJS_SERVICE_ID,
@@ -33,6 +34,10 @@ async function enviarCorreoEmailJS(paramsTemplate) {
         user_id: EMAILJS_PUBLIC_KEY,
         template_params: paramsTemplate
     };
+
+    if (EMAILJS_PRIVATE_KEY && EMAILJS_PRIVATE_KEY !== "1msqfFPPrQ3ocoWoLmagD") {
+        payload.accessToken = EMAILJS_PRIVATE_KEY;
+    }
 
     const options = {
         hostname: 'api.emailjs.com',
