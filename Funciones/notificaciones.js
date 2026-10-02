@@ -17,6 +17,7 @@ const EMAILJS_CONFIG = {
  * Función principal que recorre las pólizas y envía alertas
  * @param {Array} listaPolizas - Arreglo con todos los objetos de pólizas
  */
+
 function verificarYEnviarNotificacionesPolizas(listaPolizas) {
     
     // Registro de correos enviados en la sesión actual para no repetir

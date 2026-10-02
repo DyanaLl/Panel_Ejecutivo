@@ -27,16 +27,12 @@ function hacerPeticion(urlObj, options, data = null) {
 async function enviarCorreoEmailJS(paramsTemplate) {
     console.log(`📤 Enviando correo a ${paramsTemplate.to_email}...`);
 
-    const payload = JSON.stringify({
+    const payload = {
         service_id: EMAILJS_SERVICE_ID,
         template_id: EMAILJS_TEMPLATE_ID,
         user_id: EMAILJS_PUBLIC_KEY,
         template_params: paramsTemplate
-    });
-
-    if (EMAILJS_PRIVATE_KEY) {
-        payload.accessToken = EMAILJS_PRIVATE_KEY;
-    }
+    };
 
     const options = {
         hostname: 'api.emailjs.com',
