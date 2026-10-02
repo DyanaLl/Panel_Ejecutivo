@@ -18,17 +18,9 @@ const EMAILJS_CONFIG = {
  * @param {Array} listaPolizas - Arreglo con todos los objetos de pólizas
  */
 function verificarYEnviarNotificacionesPolizas(listaPolizas) {
-    if (!listaPolizas || !Array.isArray(listaPolizas) || listaPolizas.length === 0) {
-        console.log("No hay pólizas registradas para evaluar notificaciones.");
-        return;
-    }
-
-    // Fecha actual a medianoche para cálculo exacto de días
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
+    
     // Registro de correos enviados en la sesión actual para no repetir
-    const notificacionesEnviadas = JSON.parse(sessionStorage.getItem("notificaciones_enviadas") || "{}");
+    const notificacionesEnviadas = JSON.parse(localStorage.getItem("notificaciones_enviadas") || "{}");
 
     listaPolizas.forEach(p => {
         const estadoNorm = String(p.estadoPoliza || "").toLowerCase();
@@ -99,7 +91,7 @@ function verificarYEnviarNotificacionesPolizas(listaPolizas) {
                     console.log(` Correo enviado exitosamente para la póliza N° ${numPoliza} (${diasRestantes} días).`, response.status, response.text);
                     // Marcar como enviado en la sesión
                     notificacionesEnviadas[claveNotificacion] = true;
-                    sessionStorage.setItem("notificaciones_enviadas", JSON.stringify(notificacionesEnviadas));
+                    localStorage.setItem("notificaciones_enviadas", JSON.stringify(notificacionesEnviadas));
                 })
                 .catch(error => {
                     console.error(` Error al enviar el correo para la póliza N° ${numPoliza}:`, error);

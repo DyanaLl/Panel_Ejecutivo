@@ -157,6 +157,20 @@ function seleccionarPolizaParaEdicion(index) {
     document.getElementById("inicioVigencia").value = poliza.inicioVigencia;
     document.getElementById("finVigencia").value = poliza.finVigencia;
     document.getElementById("estadoPoliza").value = poliza.estadoPoliza || "Pendiente";
+
+    // --- CAMBIO AÑADIDO: REDIRECCIÓN/DESPLAZAMIENTO Y ENFOQUE ---
+    
+    const btnTabRegistro = document.getElementById("btn-tab-registro"); 
+    if (btnTabRegistro) {
+        btnTabRegistro.click();
+    }
+
+    // 2. Desplazar la vista suavemente hacia el formulario de registro
+    const formulario = document.getElementById("codigoPoliza") || document.getElementById("tipoPoliza");
+    if (formulario) {
+        formulario.scrollIntoView({ behavior: "smooth", block: "center" });
+        formulario.focus();
+    }
 }
 
 // 3. ACTUALIZAR PÓLIZA SELECCIONADA
@@ -546,7 +560,7 @@ function renderizarHistorialCompleto() {
                 <td><span class="badge ${claseEstado}">${p.estadoPoliza}</span></td>
                 <td>
                     <div class="contenedor-acciones-tabla">
-                        <button type="button" class="btn-tabla btn-editar" onclick="seleccionarPolizaParaEdicion(${p.indexReal})">Editar</button>
+                        <button type="button" class="btn-tabla btn-editar" onclick="seleccionarPolizaParaEdicion(${p.indexReal})"> + Editar</button>
                         <button type="button" class="btn-tabla btn-eliminar" onclick="eliminarPoliza(${p.indexReal})">Eliminar</button>
                     </div>
                 </td>
