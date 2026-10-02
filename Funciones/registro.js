@@ -34,7 +34,7 @@ function cargarPolizasGuardadas() {
             // Convertimos el objeto devuelto por Firebase en un arreglo con sus IDs
             Object.keys(datos).forEach((key) => {
                 const polizaOriginal = datos[key];
-                
+
                 // Calcula el estado actual basándonos en la fecha finVigencia
                 const estadoCalculado = calcularEstadoPoliza(polizaOriginal);
 
@@ -96,30 +96,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. REGISTRAR NUEVA PÓLIZA
 function registrarPoliza() {
-    // Ejecuta validaciones del archivo validaciones.js 
-    if (typeof validarFormularioPoliza === "function" && !validarFormularioPoliza()) {
+    // Llama a la función de validación en validaciones.js
+    const nuevaPoliza = typeof obtenerYValidarDatosFormulario === "function"
+        ? obtenerYValidarDatosFormulario()
+        : null;
+
+    // Si la validación falla (devuelve null), interrumpe el registro
+    if (!nuevaPoliza) {
         return false;
     }
 
-    const inputCodigo = document.getElementById("codigoPoliza") || document.getElementById("codigo");
-
-    // Captura datos desde el formulario de HTML - IDs
-    const nuevaPoliza = {
-        codigo: inputCodigo ? inputCodigo.value.trim() : "",
-        tipoPoliza: document.getElementById("tipoPoliza").value,
-        aseguradora: document.getElementById("aseguradora").value,
-        cliente: document.getElementById("cliente").value.trim(),
-        cedulaRuc: document.getElementById("cedulaRuc").value.trim(),
-        telefono: document.getElementById("telefonoCliente").value.trim(),
-        email: document.getElementById("emailCliente").value.trim(),
-        numeroPoliza: document.getElementById("numeroPoliza").value.trim(),
-        placaDetalle: document.getElementById("placaDetalle").value.trim(),
-        inicioVigencia: document.getElementById("inicioVigencia").value,
-        finVigencia: document.getElementById("finVigencia").value,
-        estadoPoliza: document.getElementById("estadoPoliza").value
-    };
-
-    // Guardar registro en Firebase
+    // Guardar registro validado en Firebase
     db.ref("polizas").push(nuevaPoliza)
         .then(() => {
             limpiarFormularioRegistro();
@@ -159,17 +146,11 @@ function seleccionarPolizaParaEdicion(index) {
     document.getElementById("estadoPoliza").value = poliza.estadoPoliza || "Pendiente";
 
     // --- CAMBIO AÑADIDO: REDIRECCIÓN/DESPLAZAMIENTO Y ENFOQUE ---
-    
-    const btnTabRegistro = document.getElementById("btn-tab-registro"); 
-    if (btnTabRegistro) {
-        btnTabRegistro.click();
-    }
 
-    // 2. Desplazar la vista suavemente hacia el formulario de registro
-    const formulario = document.getElementById("codigoPoliza") || document.getElementById("tipoPoliza");
-    if (formulario) {
-        formulario.scrollIntoView({ behavior: "smooth", block: "center" });
-        formulario.focus();
+    const botonRegistroSidebar = document.querySelector('.menu-lateral a[data-pantalla="pantalla-registro"]');
+
+    if (botonRegistroSidebar) {
+        botonRegistroSidebar.click();
     }
 }
 
@@ -180,30 +161,20 @@ function actualizarPolizaSeleccionada() {
         return false;
     }
 
-    if (typeof validarFormularioPoliza === "function" && !validarFormularioPoliza()) {
+    // Llama a la función de validación en validaciones.js
+    const datosActualizados = typeof obtenerYValidarDatosFormulario === "function"
+        ? obtenerYValidarDatosFormulario()
+        : null;
+
+    // Si la validación falla (devuelve null), interrumpe la actualización
+    if (!datosActualizados) {
         return false;
     }
 
     const polizaActual = polizas[polizaSeleccionadaIndex];
     const idFirebase = polizaActual.idFirebase;
-    const inputCodigo = document.getElementById("codigoPoliza") || document.getElementById("codigo");
 
-    const datosActualizados = {
-        codigo: inputCodigo ? inputCodigo.value.trim() : "",
-        tipoPoliza: document.getElementById("tipoPoliza").value,
-        aseguradora: document.getElementById("aseguradora").value,
-        cliente: document.getElementById("cliente").value.trim(),
-        cedulaRuc: document.getElementById("cedulaRuc").value.trim(),
-        telefono: document.getElementById("telefonoCliente").value.trim(),
-        email: document.getElementById("emailCliente").value.trim(),
-        numeroPoliza: document.getElementById("numeroPoliza").value.trim(),
-        placaDetalle: document.getElementById("placaDetalle").value.trim(),
-        inicioVigencia: document.getElementById("inicioVigencia").value,
-        finVigencia: document.getElementById("finVigencia").value,
-        estadoPoliza: document.getElementById("estadoPoliza").value
-    };
-
-    // Actualizar registro en Firebase
+    // Actualizar registro validado en Firebase
     db.ref("polizas/" + idFirebase).update(datosActualizados)
         .then(() => {
             limpiarFormularioRegistro();
