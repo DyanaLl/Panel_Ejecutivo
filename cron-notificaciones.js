@@ -7,46 +7,52 @@ const EMAILJS_TEMPLATE_ID = "template_gffiwwf";
 const EMAILJS_PUBLIC_KEY = "-Ed9Y1UQA95iBMfTZ";
 const CORREO_DESTINO = "foxandinaec@gmail.com";
 
-function hacerPeticion(url, options, postData) {
+function hacerPeticion(urlObj, options, data = null) {
     return new Promise((resolve, reject) => {
-        const req = https.request(url, options, (res) => {
+        const req = https.request(urlObj, options, (res) => {
             let body = '';
             res.on('data', chunk => body += chunk);
             res.on('end', () => resolve({ status: res.statusCode, body }));
         });
-        req.on('error', reject);
-        if (postData) req.write(postData);
+
+        req.on('error', (err) => reject(err));
+
+        if (data) {
+            req.write(JSON.stringify(data));
+        }
         req.end();
     });
 }
 
-async function enviarCorreoEmailJS(datosCorreo) {
+async function enviarCorreoEmailJS(paramsTemplate) {
+    console.log(`📤 Enviando correo a ${paramsTemplate.to_email}...`);
+
     const payload = JSON.stringify({
         service_id: EMAILJS_SERVICE_ID,
         template_id: EMAILJS_TEMPLATE_ID,
         user_id: EMAILJS_PUBLIC_KEY,
-        template_params: datosCorreo
+        template_params: paramsTemplate
     });
 
-    const url = new URL('https://api.emailjs.com/api/v1.0/email/send');
+    if (EMAILJS_PRIVATE_KEY) {
+        payload.accessToken = EMAILJS_PRIVATE_KEY;
+    }
 
     const options = {
-        hostname: url.hostname,
-        path: url.pathname,
+        hostname: 'api.emailjs.com',
+        path: '/api/v1.0/email/send',
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(payload),
-            'Origin': 'https://localhost' // Header indispensable para que EmailJS permita envíos desde Node.js
+            'Content-Type': 'application/json'
         }
     };
 
     try {
-        const res = await hacerPeticion(url, options, payload);
-        if (res.status === 200 || res.body === 'OK') {
-            console.log(` Correo enviado con éxito para la póliza N°: ${datosCorreo.numero_poliza}`);
+        const res = await hacerPeticion('https://api.emailjs.com/api/v1.0/email/send', options, payload);
+        if (res.status === 200) {
+            console.log(" Correo enviado con éxito a través de EmailJS.");
         } else {
-            console.error(` Error respuesta EmailJS (${res.status}): ${res.body}`);
+            console.log(` Error al enviar correo EmailJS. Código HTTP: ${res.status}, Respuesta: ${res.body}`);
         }
     } catch (err) {
         console.error(" Error de red al conectar con EmailJS:", err);
@@ -54,7 +60,7 @@ async function enviarCorreoEmailJS(datosCorreo) {
 }
 
 async function ejecutarChequeoDiario() {
-    console.log("⏰ Iniciando chequeo diario de pólizas en GitHub Actions...");
+    console.log("Iniciando chequeo diario de pólizas en GitHub Actions...");
 
     try {
         const urlFirebase = new URL(FIREBASE_URL);
@@ -86,7 +92,7 @@ async function ejecutarChequeoDiario() {
         const [hAno, hMes, hDia] = hoyStr.split("-").map(Number);
         const fechaHoy = new Date(hAno, hMes - 1, hDia);
 
-        console.log(`📅 Fecha del servidor ajustada a Ecuador: ${hoyStr}`);
+        console.log(`Fecha del servidor ajustada a Ecuador: ${hoyStr}`);
 
         const keys = Object.keys(datos);
         let alertasEnviadas = 0;
@@ -115,7 +121,7 @@ async function ejecutarChequeoDiario() {
             const numPoliza = p.numeroPoliza || p.numPoliza || p.poliza || "S/N";
             const clienteNombre = p.cliente || p.nombreCliente || "Cliente Registrado";
 
-            console.log(`🔍 Póliza N° ${numPoliza} (${clienteNombre}): Faltan ${diasRestantes} días (Vence: ${fechaFinStr}).`);
+            console.log(`Póliza N° ${numPoliza} (${clienteNombre}): Faltan ${diasRestantes} días (Vence: ${fechaFinStr}).`);
 
             // Evaluar alertas exactas (10, 5 o 0 días)
             if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
@@ -163,3 +169,6 @@ async function ejecutarChequeoDiario() {
         console.error(" Error inesperado durante el chequeo:", error);
     }
 }
+
+ejecutarChequeoDiario();
+
