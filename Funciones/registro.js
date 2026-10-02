@@ -387,6 +387,12 @@ function obtenerPolizasVencenEsteMes() {
     return polizas.filter(poliza => {
         if (!poliza.finVigencia) return false;
 
+        // Validar que el estado no sea Renovada ni Cancelada
+        const estadoNorm = String(poliza.estadoPoliza || "").toLowerCase();
+        if (estadoNorm.includes("renovad") || estadoNorm.includes("cancelad")) {
+            return false;
+        }
+
         // Convertimos la fecha (YYYY-MM-DD)
         const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
 
@@ -409,6 +415,12 @@ function obtenerPolizasVencenProximoMes() {
 
     return polizas.filter(poliza => {
         if (!poliza.finVigencia) return false;
+
+        // Validar que el estado no sea Renovada ni Cancelada
+        const estadoNorm = String(poliza.estadoPoliza || "").toLowerCase();
+        if (estadoNorm.includes("renovad") || estadoNorm.includes("cancelad")) {
+            return false;
+        }
 
         const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
 

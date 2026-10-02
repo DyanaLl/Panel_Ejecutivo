@@ -4,7 +4,7 @@ const https = require('https');
 const FIREBASE_URL = "https://pagi-e6b7b-default-rtdb.firebaseio.com/polizas.json";
 const EMAILJS_SERVICE_ID = "service_0l481se";
 const EMAILJS_TEMPLATE_ID = "template_gffiwwf";
-const EMAILJS_PUBLIC_KEY = "M3Yd5O6e614G0_6_N"; 
+const EMAILJS_PUBLIC_KEY = "M3Yd5O6e614G0_6_N";
 const CORREO_DESTINO = "milenalro2001@gmail.com";
 
 function hacerPeticion(url, options, postData) {
@@ -91,7 +91,7 @@ async function ejecutarChequeoDiario() {
             fechaFin.setHours(0, 0, 0, 0);
 
             const diffTime = fechaFin.getTime() - fechaHoy.getTime();
-            const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diasRestantes = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
             // Evaluamos alertas exactas de 10, 5 o 0 días
             if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
@@ -111,6 +111,27 @@ async function ejecutarChequeoDiario() {
                     placa_detalle: p.placaDetalle || p.placa || p.detalle || "-",
                     fin_vigencia: fechaFinStr
                 };
+                
+                // Asignar los mensajes según la urgencia de días restantes
+                if (diasRestantes === 10) {
+                    datosCorreo.asunto_correo = `[Recordatorio Interno] Póliza de ${clienteNombre} vence en 10 días`;
+                    datosCorreo.nivel_urgencia = "RECORDATORIO PREVENTIVO";
+                    datosCorreo.mensaje_cabecera = `Le recordamos que la póliza del cliente ${clienteNombre} está a 10 días de vencer. Se recomienda coordinar la primera toma de contacto.`;
+                    datosCorreo.badge_estado = "Vence en 10 días";
+                    datosCorreo.mensaje_pie = "Por favor, iniciar la gestión con el cliente para revisar su proceso de renovación.";
+                } else if (diasRestantes === 5) {
+                    datosCorreo.asunto_correo = `[Prioridad Alta] Póliza de ${clienteNombre} vence en 5 días`;
+                    datosCorreo.nivel_urgencia = "AVISO PRIORITARIO";
+                    datosCorreo.mensaje_cabecera = `Atención: Quedan únicamente 5 días para el vencimiento de la póliza de ${clienteNombre}. Se requiere seguimiento urgente.`;
+                    datosCorreo.badge_estado = "Vence en 5 días";
+                    datosCorreo.mensaje_pie = "Contactar directamente al cliente para confirmar si procederá con la renovación.";
+                } else if (diasRestantes === 0) {
+                    datosCorreo.asunto_correo = `[URGENTE HOY] La póliza de ${clienteNombre} vence HOY`;
+                    datosCorreo.nivel_urgencia = "¡ALERTA DE VENCIMIENTO HOY!";
+                    datosCorreo.mensaje_cabecera = `Alerta crítica: La póliza de ${clienteNombre} vence el día de hoy. Es necesario gestionar la renovación de inmediato para no perder la cobertura.`;
+                    datosCorreo.badge_estado = "¡VENCE HOY!";
+                    datosCorreo.mensaje_pie = "Realizar llamada o gestión prioritaria hoy mismo con el cliente.";
+                }
 
                 await enviarCorreoEmailJS(datosCorreo);
             }
