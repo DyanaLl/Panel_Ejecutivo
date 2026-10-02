@@ -1,11 +1,11 @@
 const https = require('https');
 
-// CONFIGURACIÓN DE TUS SERVICIOS
+// CONFIGURACIÓN DE TUS SERVICIOS (Credenciales actualizadas)
 const FIREBASE_URL = "https://pagi-e6b7b-default-rtdb.firebaseio.com/polizas.json";
-const EMAILJS_SERVICE_ID = "service_0l481se";
+const EMAILJS_SERVICE_ID = "service_sbvs893";
 const EMAILJS_TEMPLATE_ID = "template_gffiwwf";
-const EMAILJS_PUBLIC_KEY = "M3Yd5O6e614G0_6_N";
-const CORREO_DESTINO = "milenalro2001@gmail.com";
+const EMAILJS_PUBLIC_KEY = "-Ed9Y1UQA95iBMfTZ";
+const CORREO_DESTINO = "foxandinaec@gmail.com";
 
 function hacerPeticion(url, options, postData) {
     return new Promise((resolve, reject) => {
@@ -49,7 +49,7 @@ async function enviarCorreoEmailJS(datosCorreo) {
 }
 
 async function ejecutarChequeoDiario() {
-    console.log("⏰ Iniciando chequeo de pólizas a las 11:00 AM...");
+    console.log("⏰ Iniciando chequeo diario de pólizas...");
 
     try {
         const res = await hacerPeticion(FIREBASE_URL, { method: 'GET' });
@@ -64,11 +64,14 @@ async function ejecutarChequeoDiario() {
             return;
         }
 
+        // Crear la fecha de HOY a medianoche ajustada a Ecuador (UTC-5)
         const hoy = new Date();
-        // Ajuste a zona horaria de Ecuador (UTC-5)
-        const hoyEcuadorStr = hoy.toLocaleDateString("en-US", { timeZone: "America/Guayaquil" });
-        const fechaHoy = new Date(hoyEcuadorStr);
-        fechaHoy.setHours(0, 0, 0, 0);
+        const fechaHoyEcuador = new Date(hoy.getTime() - (5 * 60 * 60 * 1000));
+        const hoyStr = fechaHoyEcuador.toISOString().split("T")[0]; // "YYYY-MM-DD"
+        const [hAno, hMes, hDia] = hoyStr.split("-").map(Number);
+        const fechaHoy = new Date(hAno, hMes - 1, hDia);
+
+        console.log(`📅 Fecha base de comparación (Ecuador): ${hoyStr}`);
 
         const keys = Object.keys(datos);
 
@@ -81,17 +84,19 @@ async function ejecutarChequeoDiario() {
                 continue;
             }
 
-            if (!p.finVigencia) continue;
+            const fechaFinStr = p.finVigencia || p.fechaFin;
+            if (!fechaFinStr) continue;
 
             // Formato esperado YYYY-MM-DD
-            const partes = p.finVigencia.split("-");
+            const partes = fechaFinStr.split("-");
             if (partes.length !== 3) continue;
 
-            const fechaFin = new Date(partes[0], partes[1] - 1, partes[2]);
-            fechaFin.setHours(0, 0, 0, 0);
+            const fechaFin = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
 
             const diffTime = fechaFin.getTime() - fechaHoy.getTime();
             const diasRestantes = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+            console.log(`🔍 Evaluando Póliza N° ${p.numeroPoliza || p.numPoliza}: Quedan ${diasRestantes} días.`);
 
             // Evaluamos alertas exactas de 10, 5 o 0 días
             if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
@@ -99,7 +104,6 @@ async function ejecutarChequeoDiario() {
 
                 const clienteNombre = p.cliente || p.nombreCliente || "Cliente Registrado";
                 const numPoliza = p.numeroPoliza || p.numPoliza || p.poliza || "-";
-                const fechaFinStr = p.finVigencia || "-";
 
                 const datosCorreo = {
                     to_email: CORREO_DESTINO,
@@ -112,7 +116,6 @@ async function ejecutarChequeoDiario() {
                     fin_vigencia: fechaFinStr
                 };
                 
-                // Asignar los mensajes según la urgencia de días restantes
                 if (diasRestantes === 10) {
                     datosCorreo.asunto_correo = `[Recordatorio Interno] Póliza de ${clienteNombre} vence en 10 días`;
                     datosCorreo.nivel_urgencia = "RECORDATORIO PREVENTIVO";

@@ -24,21 +24,8 @@ body {
     padding: 32px 36px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid #e5e8eb;
-
-    /* 1. Definimos un ancho máximo más pequeño */
-    max-width: 780px !important;
-
-    /* 2. Dejamos un 90% de ancho con márgenes dinámicos */
-    width: 90% !important;
-
-    /* 3. Forzamos centrado exacto y espacio de respiración (arriba, abajo y lados) */
-    margin-top: 40px !important;
-    margin-bottom: 40px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    
-    /* 4. Evita que se estire si el contenedor padre usa Flexbox */
-    align-self: center !important; 
+    max-width: 720px;
+    margin: 40px auto; /* Centra solo el formulario si así lo deseas */
 }
 
 .seccion-registro h2 {
