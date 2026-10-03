@@ -1,17 +1,15 @@
 name: Reloj Diario Notificaciones Polizas
 
 on:
+  workflow_dispatch:
   schedule:
-    # 16:00 UTC equivale a las 11:00 AM hora de Ecuador (UTC-5)
-    - cron: "0 16 * * *"
-  workflow_dispatch: 
+    - cron: '0 19 * * *' 
 
 jobs:
-  ejecutar-notificaciones:
+  chequeo-polizas:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Descargar codigo del repositorio
+      - name: Descargar repositorio
         uses: actions/checkout@v3
 
       - name: Configurar Node.js
@@ -21,3 +19,4 @@ jobs:
 
       - name: Ejecutar Script de Notificaciones
         run: node cron-notificaciones.js
+
