@@ -111,76 +111,76 @@
             <!-- CONTENEDOR EN 2 COLUMNAS (LADO A LADO) -->
             <div class="grid-dashboard">
 
-                    <!-- Registro -->
-                    <!-- Pólizas por Vencer -->
-                    <div class="tarjeta-dashboard">
-                        <h2>Pólizas por Vencer</h2>
+                <!-- Registro -->
+                <!-- Pólizas por Vencer -->
+                <div class="tarjeta-dashboard">
+                    <h2>Pólizas por Vencer</h2>
 
-                        <div class="seccion-tabla-corta">
-                            <h3>Vencen Este Mes</h3>
-                            <div class="contenedor-tabla">
-                                <table class="tabla-dashboard-ancho">
-                                    <thead>
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th>Tipo / Aseguradora</th>
-                                            <th>N° Póliza</th>
-                                            <th>Fin Vigencia</th>
-                                            <th>Días Restantes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabla-vencen-este-mes-inicio"></tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="seccion-tabla-corta separador-bloque-tabla">
-                            <h3>Vencen el Próximo Mes</h3>
-                            <div class="contenedor-tabla">
-                                <table class="tabla-dashboard-ancho">
-                                    <thead>
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th>Tipo / Aseguradora</th>
-                                            <th>N° Póliza</th>
-                                            <th>Fin Vigencia</th>
-                                            <th>Días Restantes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabla-vencen-proximo-mes-inicio"></tbody>
-                                </table>
-                            </div>
+                    <div class="seccion-tabla-corta">
+                        <h3>Vencen Este Mes</h3>
+                        <div class="contenedor-tabla">
+                            <table class="tabla-dashboard-ancho">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Tipo / Aseguradora</th>
+                                        <th>N° Póliza</th>
+                                        <th>Fin Vigencia</th>
+                                        <th>Días Restantes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-vencen-este-mes-inicio"></tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <!-- Tabla de Resultados + Botón Ver Historial -->
-                    <div class="tarjeta-dashboard">
-                        <div class="encabezado-tarjeta-flex">
-                            <h2>Tabla de Resultados</h2>
-                            <button type="button" class="btn-verde-historial" id="btn-ir-historial">
-                                Ver Historial Completo
-                            </button>
-                        </div>
-
+                    <div class="seccion-tabla-corta separador-bloque-tabla">
+                        <h3>Vencen el Próximo Mes</h3>
                         <div class="contenedor-tabla">
-                            <table class="tabla-dashboard-ancho tabla-resumen-ejecutivo">
+                            <table class="tabla-dashboard-ancho">
                                 <thead>
                                     <tr>
-                                        <th>Tipo de Seguro</th>
-                                        <th>Activos</th>
-                                        <th>Por Vencer</th>
-                                        <th>Vencidos</th>
-                                        <th>Renovadas</th>
-                                        <th>Canceladas</th>
-
-
+                                        <th>Cliente</th>
+                                        <th>Tipo / Aseguradora</th>
+                                        <th>N° Póliza</th>
+                                        <th>Fin Vigencia</th>
+                                        <th>Días Restantes</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabla-resumen-general-inicio"></tbody>
+                                <tbody id="tabla-vencen-proximo-mes-inicio"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <!-- Tabla de Resultados + Botón Ver Historial -->
+                <div class="tarjeta-dashboard">
+                    <div class="encabezado-tarjeta-flex">
+                        <h2>Tabla de Resultados</h2>
+                        <button type="button" class="btn-verde-historial" id="btn-ir-historial">
+                            Ver Historial Completo
+                        </button>
+                    </div>
+
+                    <div class="contenedor-tabla">
+                        <table class="tabla-dashboard-ancho tabla-resumen-ejecutivo">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Seguro</th>
+                                    <th>Activos</th>
+                                    <th>Por Vencer</th>
+                                    <th>Vencidos</th>
+                                    <th>Renovadas</th>
+                                    <th>Canceladas</th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-resumen-general-inicio"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             </div>
         </section>
@@ -358,14 +358,30 @@
 
             <!-- Filtro por Tipo de Póliza -->
             <div class="contenedor-filtro">
-                <label for="filtroTipoSeguro"><strong>Seleccionar tipo de seguro:</strong></label>
-                <select id="filtroTipoSeguro">
-                    <option value="TODOS">-- Todos los tipos de seguro --</option>
-                    <option value="Vehículos Livianos">Vehículos Livianos</option>
-                    <option value="Vehículos Pesados">Vehículos Pesados</option>
-                    <option value="Incendio">Incendio</option>
-                    <option value="Responsabilidad Civil">Responsabilidad Civil</option>
-                </select>
+                <div class="grupo-filtro-select">
+                    <label for="filtroTipoSeguro"><strong>Seleccionar tipo de seguro:</strong></label>
+                    <select id="filtroTipoSeguro" onchange="renderizarHistorialCompleto()">
+                        <option value="TODOS">-- Todos los tipos de seguro --</option>
+                        <option value="Vehículos Livianos">Vehículos Livianos</option>
+                        <option value="Vehículos Pesados">Vehículos Pesados</option>
+                        <option value="Responsabilidad Civil">Responsabilidad Civil</option>
+                        <option value="Accidentes Personales">Accidentes Personales</option>
+                        <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
+                        <option value="Equipo Electrónico">Equipo Electrónico</option>
+                        <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas</option>
+                        <option value="Incendio">Incendio</option>
+                        <option value="Multiriesgo">Multiriesgo</option>
+                        <option value="Vida Individual">Vida Individual</option>
+                    </select>
+                </div>
+
+                <!-- Barra de búsqueda centrada para el Historial -->
+                <div class="buscador-historial-container">
+                    <span class="icono-buscar">🔍</span>
+                    <input type="text" id="inputBusquedaHistorial"
+                        placeholder="Buscar por cliente, N° póliza, RUC, teléfono, correo, placa, estado..."
+                        onkeyup="renderizarHistorialCompleto()">
+                </div>
             </div>
 
             <!-- Tabla de Historial Completo -->

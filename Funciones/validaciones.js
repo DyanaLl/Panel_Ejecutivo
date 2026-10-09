@@ -4,8 +4,10 @@
  * @returns {boolean}
  */
 function validarEmail(email) {
+    const val = email.trim();
+    // Exige texto antes y después del arroba '@'
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+    return regex.test(val);
 }
 
 /**
@@ -16,7 +18,7 @@ function validarEmail(email) {
 function validarCedulaRuc(identificacion) {
     const val = identificacion.trim();
     if (!/^\d+$/.test(val)) return false;
-    
+
     // Cédula: 10 dígitos, RUC persona natural: 13 dígitos
     if (val.length === 10 || val.length === 13) {
         return true;
@@ -31,7 +33,7 @@ function validarCedulaRuc(identificacion) {
  */
 function validarTelefono(telefono) {
     const val = telefono.trim();
-    const regex = /^[0-9]{7,10}$/;
+    const regex = /^[0-9]{9,10}$/;
     return regex.test(val);
 }
 
@@ -89,8 +91,8 @@ function obtenerYValidarDatosFormulario() {
         aseguradora,
         cliente,
         cedulaRuc,
-        telefonoCliente,
-        emailCliente,
+        telefono: telefonoCliente, 
+        email: emailCliente,       
         numeroPoliza,
         placaDetalle,
         inicioVigencia,
@@ -111,5 +113,5 @@ function limpiarFormulario() {
 }
 
 function validarFormularioPoliza() {
-    return true; 
+    return true;
 }

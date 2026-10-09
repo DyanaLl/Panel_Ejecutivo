@@ -1,20 +1,30 @@
 function calcularEstadoPoliza(poliza) {
-    // Si la póliza ya fue renovada o cancelada explícitamente, se respeta ese estado
-    const estadoGuardado = String(poliza.estadoPoliza || "").toLowerCase();
-    if (estadoGuardado.includes("renovad")) return "Renovada";
-    if (estadoGuardado.includes("cancelad")) return "Cancelada";
+    const estadoGuardado = String(poliza.estadoPoliza || "").trim();
+    const estadoMinus = estadoGuardado.toLowerCase();
 
-    if (!poliza.finVigencia) return poliza.estadoPoliza || "Pendiente";
+    // 1. Si la póliza ya fue renovada o cancelada explícitamente, se respeta
+    if (estadoMinus.includes("renovad")) return "Renovada";
+    if (estadoMinus.includes("cancelad")) return "Cancelada";
 
-    // Obtener la fecha de hoy sin tomar en cuenta horas
+    // Si no tiene fecha de fin registrada, se mantiene el estado seleccionado o 'Pendiente'
+    if (!poliza.finVigencia) return estadoGuardado || "Pendiente";
+
+    // 2. Obtener fecha de hoy sin tomar en cuenta horas
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // Convertir la fecha de fin de vigencia (YYYY-MM-DD)
+    // Convertir fecha de fin de vigencia (YYYY-MM-DD)
     const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
 
-    if (fechaFin < hoy) {
+    // Calcular la diferencia en días
+    const diferenciaMs = fechaFin - hoy;
+    const diasRestantes = Math.ceil(diferenciaMs / (1000 * 60 * 60 * 24));
+
+    // 3. Reglas dinámicas e intuitivas de estado
+    if (diasRestantes <= 0) {
         return "Vencida";
+    } else if (diasRestantes <= 10) {
+        return "Próxima a Vencer";
     } else {
         return "Activa";
     }
@@ -484,10 +494,12 @@ function eliminarPoliza(index) {
 function renderizarHistorialCompleto() {
     const tablaHistorial = document.getElementById("tabla-historial-completo");
     const comboFiltro = document.getElementById("filtroTipoSeguro");
+    const inputBusqueda = document.getElementById("inputBusquedaHistorial");
 
     if (!tablaHistorial || !comboFiltro) return;
 
     const tipoSeleccionado = comboFiltro.value;
+    const textoBusqueda = inputBusqueda ? inputBusqueda.value.toLowerCase().trim() : "";
 
     if (polizas.length === 0) {
         tablaHistorial.innerHTML = `<tr><td colspan="10" class="sin-datos">No hay pólizas registradas en el sistema.</td></tr>`;
@@ -498,12 +510,42 @@ function renderizarHistorialCompleto() {
 
     // Filtrar pólizas por tipo de seguro
     const polizasFiltradas = polizasConIndice.filter(p => {
-        if (tipoSeleccionado === "TODOS" || tipoSeleccionado === "") return true;
-        return p.tipoPoliza === tipoSeleccionado;
+        // 1. Filtro por Select de Tipo de Seguro
+        const coincideTipo = (tipoSeleccionado === "TODOS" || tipoSeleccionado === "" || p.tipoPoliza === tipoSeleccionado);
+        if (!coincideTipo) return false;
+
+        // 2. Filtro por Texto en Todos los Campos
+        if (textoBusqueda === "") return true;
+
+        const codigo = String(p.codigo || p.codigoPoliza || "").toLowerCase();
+        const cliente = String(p.cliente || "").toLowerCase();
+        const cedulaRuc = String(p.cedulaRuc || "").toLowerCase();
+        const telefono = String(p.telefono || p.telefonoCliente || "").toLowerCase();
+        const email = String(p.email || p.correo || p.emailCliente || "").toLowerCase();
+        const aseguradora = String(p.aseguradora || "").toLowerCase();
+        const tipoPoliza = String(p.tipoPoliza || "").toLowerCase();
+        const numeroPoliza = String(p.numeroPoliza || "").toLowerCase();
+        const placaDetalle = String(p.placaDetalle || "").toLowerCase();
+        const inicioVigencia = String(p.inicioVigencia || "").toLowerCase();
+        const finVigencia = String(p.finVigencia || "").toLowerCase();
+        const estadoPoliza = String(p.estadoPoliza || "").toLowerCase();
+
+        return codigo.includes(textoBusqueda) ||
+               cliente.includes(textoBusqueda) ||
+               cedulaRuc.includes(textoBusqueda) ||
+               telefono.includes(textoBusqueda) ||
+               email.includes(textoBusqueda) ||
+               aseguradora.includes(textoBusqueda) ||
+               tipoPoliza.includes(textoBusqueda) ||
+               numeroPoliza.includes(textoBusqueda) ||
+               placaDetalle.includes(textoBusqueda) ||
+               inicioVigencia.includes(textoBusqueda) ||
+               finVigencia.includes(textoBusqueda) ||
+               estadoPoliza.includes(textoBusqueda);
     });
 
     if (polizasFiltradas.length === 0) {
-        tablaHistorial.innerHTML = `<tr><td colspan="10" class="sin-datos">No hay pólizas registradas para este tipo de seguro.</td></tr>`;
+        tablaHistorial.innerHTML = `<tr><td colspan="13" class="sin-datos">No se encontraron pólizas que coincidan con la búsqueda.</td></tr>`;
         return;
     }
 
