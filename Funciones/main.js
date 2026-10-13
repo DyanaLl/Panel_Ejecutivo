@@ -424,3 +424,20 @@ function cerrarModalFichaCliente() {
     }
 }
 
+//SUGERENCIAS-REGISTRO
+// Escuchadores en tiempo real para activar las sugerencias flotantes en cada input crítico
+    const camposMonitoreadosValidacion = [
+        "cliente", "cedulaRuc", "telefonoCliente", 
+        "emailCliente", "numeroPoliza", "placaDetalle", "codigoPoliza"
+    ];
+
+    camposMonitoreadosValidacion.forEach(id => {
+        const inputElem = document.getElementById(id);
+        if (inputElem) {
+            inputElem.addEventListener("input", () => {
+                if (typeof verificarSimilitudesYBloqueo === "function") {
+                    verificarSimilitudesYBloqueo();
+                }
+            });
+        }
+    });
