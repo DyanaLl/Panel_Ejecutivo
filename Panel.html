@@ -264,6 +264,17 @@
                     <div id="sugerencia-detalle" class="sugerencias-flotantes"></div>
                 </div>
 
+                <!-- Valor Asegurado y Prima Neta  -->
+                <div class="grupo-formulario">
+                    <label for="valorAsigurado">Valor Asegurado</label>
+                    <input type="number" id="valorAsigurado" step="0.01" placeholder="Ej. 10000.00">
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="primaNeta">Prima Neta</label>
+                    <input type="number" id="primaNeta" step="0.01" placeholder="Ej. 450.00">
+                </div>
+
                 <!-- Inicio Vigencia y Fin Vigencia -->
                 <div class="grupo-formulario">
                     <label for="inicioVigencia">Inicio Vigencia</label>
@@ -290,6 +301,15 @@
                         <option value="Vencido">Vencido</option>
                         <option value="Renovada">Renovada</option>
                         <option value="Cancelada">Cancelada</option>
+                    </select>
+                </div>
+
+                <!-- Endoso Beneficiario-->
+                <div class="grupo-formulario" style="grid-column: 2;">
+                    <label for="endosoBeneficiario">Endoso Beneficiario</label>
+                    <select id="endosoBeneficiario">
+                        <option value="No">No</option>
+                        <option value="Sí">Sí</option>
                     </select>
                 </div>
 
@@ -387,7 +407,7 @@
                 <div class="buscador-historial-container">
                     <span class="icono-buscar">🔍</span>
                     <input type="text" id="inputBusquedaHistorial"
-                        placeholder="Buscar por cliente, N° póliza, RUC, teléfono, correo, placa, estado..."
+                        placeholder="Buscar por cualquier item"
                         onkeyup="renderizarHistorialCompleto()">
                 </div>
             </div>
@@ -406,6 +426,9 @@
                             <th>Tipo Póliza</th>
                             <th>N° Póliza</th>
                             <th>Placa / Detalle</th>
+                            <th>Valor Asegurado</th>
+                            <th>Prima Neta</th>
+                            <th>Endoso Benenficiario</th>
                             <th>Inicio Vigencia</th>
                             <th>Fin Vigencia</th>
                             <th>Estado</th>
@@ -521,6 +544,18 @@
                     </div>
                     <div class="campo-ficha">
                         <label>Placa / Detalle</label>
+                        <p id="ficha-placa">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Valor Asegurado</label>
+                        <p id="ficha-placa">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Prima Neta</label>
+                        <p id="ficha-placa">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Endoso Beneficiario</label>
                         <p id="ficha-placa">-</p>
                     </div>
                     <div class="campo-ficha">

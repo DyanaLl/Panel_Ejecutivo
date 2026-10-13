@@ -51,6 +51,9 @@ function obtenerYValidarDatosFormulario() {
     const emailCliente = document.getElementById('emailCliente').value.trim();
     const numeroPoliza = document.getElementById('numeroPoliza').value.trim();
     const placaDetalle = document.getElementById('placaDetalle').value.trim();
+    const valorAsigurado = document.getElementById('valorAsigurado').value.trim()
+    const primaNeta = document.getElementById('primaNeta').value.trim()
+    const endosoBeneficiario = document.getElementById('endosoBeneficiario').value.trim()
     const inicioVigencia = document.getElementById('inicioVigencia').value;
     const finVigencia = document.getElementById('finVigencia').value;
     const codigoPoliza = document.getElementById('codigoPoliza').value.trim();
@@ -96,6 +99,9 @@ function obtenerYValidarDatosFormulario() {
         email: emailCliente,       
         numeroPoliza,
         placaDetalle,
+        valorAsigurado,    
+        primaNeta,         
+        endosoBeneficiario,
         inicioVigencia,
         finVigencia,
         codigoPoliza,

@@ -151,6 +151,9 @@ function seleccionarPolizaParaEdicion(index) {
     document.getElementById("emailCliente").value = poliza.email || "";
     document.getElementById("numeroPoliza").value = poliza.numeroPoliza;
     document.getElementById("placaDetalle").value = poliza.placaDetalle;
+    document.getElementById("valorAsigurado").value = poliza.valorAsigurado || "";
+    document.getElementById("primaNeta").value = poliza.primaNeta || "";
+    document.getElementById("endosoBeneficiario").value = poliza.endosoBeneficiario || "No";
     document.getElementById("inicioVigencia").value = poliza.inicioVigencia;
     document.getElementById("finVigencia").value = poliza.finVigencia;
     document.getElementById("estadoPoliza").value = poliza.estadoPoliza || "Pendiente";
@@ -211,6 +214,9 @@ function limpiarFormularioRegistro() {
     document.getElementById("emailCliente").value = "";
     document.getElementById("numeroPoliza").value = "";
     document.getElementById("placaDetalle").value = "";
+    document.getElementById("valorAsigurado").value = "";
+    document.getElementById("primaNeta").value = "";
+    document.getElementById("endosoBeneficiario").value = "No";
     document.getElementById("inicioVigencia").value = "";
     document.getElementById("finVigencia").value = "";
     document.getElementById("estadoPoliza").value = "Pendiente";
@@ -243,6 +249,9 @@ function exportarPolizasAExcel() {
             "Tipo de Póliza",
             "N° Póliza",
             "Placa / Detalle",
+            "Valor Asegurado",
+            "Prima Neta",
+            "Endoso Beneficiario",
             "Inicio Vigencia",
             "Fin Vigencia",
             "Estado"
@@ -258,6 +267,9 @@ function exportarPolizasAExcel() {
             p.tipoPoliza,
             p.numeroPoliza,
             p.placaDetalle,
+            p.valorAsigurado,
+            p.primaNeta,
+            p.endosoBeneficiario,
             p.inicioVigencia,
             p.finVigencia,
             p.estadoPoliza
@@ -270,13 +282,18 @@ function exportarPolizasAExcel() {
     hoja["!cols"] = [
         { wch: 14 }, // Código
         { wch: 25 }, // Cliente
-        { wch: 16 }, // RUC
+        { wch: 16 }, // Cédula/RUC
+        { wch: 18 }, // Teléfono
+        { wch: 22 }, // Correo
         { wch: 18 }, // Aseguradora
-        { wch: 22 }, // Tipo
+        { wch: 22 }, // Tipo de Póliza
         { wch: 14 }, // N° Póliza
-        { wch: 16 }, // Placa
-        { wch: 15 }, // Inicio
-        { wch: 15 }, // Fin
+        { wch: 16 }, // Placa / Detalle
+        { wch: 16 }, // Valor Asegurado
+        { wch: 14 }, // Prima Neta
+        { wch: 18 }, // Endoso Beneficiario
+        { wch: 15 }, // Inicio Vigencia
+        { wch: 15 }, // Fin Vigencia
         { wch: 18 }  // Estado
     ];
 
@@ -308,19 +325,19 @@ function exportarPolizasAExcel() {
     };
 
     // Aplicar estilo a Encabezados
-    for (let c = 0; c < 10; c++) {
+    for (let c = 0; c < 15; c++) {
         const dir = XLSX.utils.encode_cell({ r: 0, c });
         if (hoja[dir]) hoja[dir].s = estiloEncabezado;
     }
 
     // Aplicar estilo a Filas de Datos
     for (let f = 1; f < datosExcel.length; f++) {
-        for (let c = 0; c < 10; c++) {
+        for (let c = 0; c < 15; c++) {
             const dir = XLSX.utils.encode_cell({ r: f, c });
             if (!hoja[dir]) continue;
 
             // Centrar código, cédula, póliza, placa y fechas
-            const esCentro = [0, 2, 5, 6, 7, 8].includes(c);
+            const esCentro = [0, 2, 7, 8, 9, 10, 11, 12, 13].includes(c);
 
             hoja[dir].s = {
                 ...estiloCeldaBase,
@@ -330,7 +347,7 @@ function exportarPolizasAExcel() {
         }
 
         // Estilo Estado
-        const dirEstado = XLSX.utils.encode_cell({ r: f, c: 9 });
+        const dirEstado = XLSX.utils.encode_cell({ r: f, c: 14 });
         const celdaEst = hoja[dirEstado];
 
         if (celdaEst) {
@@ -526,6 +543,9 @@ function renderizarHistorialCompleto() {
         const tipoPoliza = String(p.tipoPoliza || "").toLowerCase();
         const numeroPoliza = String(p.numeroPoliza || "").toLowerCase();
         const placaDetalle = String(p.placaDetalle || "").toLowerCase();
+        const valorAsigurado = String (p.valorAsigurado || "").toLowerCase();
+        const primaNeta = String (p.primaNeta || "").toLowerCase();
+        const endosoBeneficiario = String (p.endosoBeneficiario|| "").toLowerCase();
         const inicioVigencia = String(p.inicioVigencia || "").toLowerCase();
         const finVigencia = String(p.finVigencia || "").toLowerCase();
         const estadoPoliza = String(p.estadoPoliza || "").toLowerCase();
@@ -539,6 +559,9 @@ function renderizarHistorialCompleto() {
                tipoPoliza.includes(textoBusqueda) ||
                numeroPoliza.includes(textoBusqueda) ||
                placaDetalle.includes(textoBusqueda) ||
+               valorAsigurado.includes(textoBusqueda) ||
+               primaNeta.includes(textoBusqueda) ||
+               endosoBeneficiario.includes(textoBusqueda) ||
                inicioVigencia.includes(textoBusqueda) ||
                finVigencia.includes(textoBusqueda) ||
                estadoPoliza.includes(textoBusqueda);
@@ -568,6 +591,9 @@ function renderizarHistorialCompleto() {
                 <td>${p.tipoPoliza}</td>
                 <td>${p.numeroPoliza}</td>
                 <td>${p.placaDetalle || "-"}</td>
+                <td>${p.valorAsigurado || "-"}</td>
+                <td>${p.primaNeta || "-"}</td>
+                <td>${p.endosoBeneficiario || "-"}</td>
                 <td>${p.inicioVigencia}</td>
                 <td>${p.finVigencia}</td>
                 <td><span class="badge ${claseEstado}">${p.estadoPoliza}</span></td>
@@ -640,10 +666,6 @@ function renderizarResumenGeneral() {
                 <td>
                     <span class="badge badge-pendiente contador-interactivo" 
                           onclick="abrirModalDetalle('${tipo}', 'Por Vencer')">${porVencer}</span>
-                </td>
-                <td>
-                    <span class="badge badge-vencido contador-interactivo" 
-                          onclick="abrirModalDetalle('${tipo}', 'Vencido')">${vencidos}</span>
                 </td>
                 <td>
                     <span class="badge badge-activo contador-interactivo" 
