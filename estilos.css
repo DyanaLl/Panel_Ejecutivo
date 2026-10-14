@@ -376,16 +376,35 @@ table tbody tr:hover {
 }
 
 /* TABLA DE RESULTADOS */
+/* ==========================================
+   ESTILOS NUEVOS: BOTÓN RESUMEN Y MODAL FLOTANTE
+   ========================================== */
 
-.contenedor-resumen {
-  background-color: #ffffff;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  border-top: 4px solid #2563eb;
-  /* Barra de acento azul superior */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-  margin-bottom: 28px;
+/* Contenedor del botón debajo de la barra de búsqueda */
+.contenedor-boton-resumen {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Fondo oscuro translúcido para el modal flotante del resumen */
+#modal-resumen-tipos {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ocultar el modal correctamente */
+#modal-resumen-tipos.modal-oculto {
+  display: none !important;
 }
 
 .tabla-resumen-ejecutivo {
@@ -558,16 +577,6 @@ main {
   max-width: 100%;
   padding-left: 0px;
   padding-right: 0px;
-  box-sizing: border-box;
-}
-
-/* Grid de 2 columnas paralelas */
-.grid-dashboard {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-  width: 100%;
   box-sizing: border-box;
 }
 

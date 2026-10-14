@@ -108,397 +108,355 @@
                 </div>
             </div>
 
-            <!-- CONTENEDOR EN 2 COLUMNAS (LADO A LADO) -->
-            <div class="grid-dashboard">
+            <!-- Botón para abrir el Resumen por Tipo de Seguro (debajo de la barra de búsqueda) -->
+            <div class="contenedor-boton-resumen" style="margin-bottom: 20px;">
+                <button type="button" class="btn-verde-historial" id="btn-abrir-resumen-modal">
+                    Resumen por Tipo de Seguro
+                </button>
+            </div>
 
-                <!-- Registro -->
-                <!-- Pólizas por Vencer -->
-                <div class="tarjeta-dashboard">
-                    <h2>Pólizas por Vencer</h2>
+            <!-- Pólizas por Vencer -->
+            <div class="tarjeta-dashboard">
+                <h2>Pólizas por Vencer</h2>
 
-                    <div class="seccion-tabla-corta">
-                        <h3>Vencen Este Mes</h3>
-                        <div class="contenedor-tabla">
-                            <table class="tabla-dashboard-ancho">
-                                <thead>
-                                    <tr>
-                                        <th>Cliente</th>
-                                        <th>Tipo / Aseguradora</th>
-                                        <th>N° Póliza</th>
-                                        <th>Fin Vigencia</th>
-                                        <th>Días Restantes</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-vencen-este-mes-inicio"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="seccion-tabla-corta separador-bloque-tabla">
-                        <h3>Vencen el Próximo Mes</h3>
-                        <div class="contenedor-tabla">
-                            <table class="tabla-dashboard-ancho">
-                                <thead>
-                                    <tr>
-                                        <th>Cliente</th>
-                                        <th>Tipo / Aseguradora</th>
-                                        <th>N° Póliza</th>
-                                        <th>Fin Vigencia</th>
-                                        <th>Días Restantes</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-vencen-proximo-mes-inicio"></tbody>
-                            </table>
-                        </div>
+                <div class="seccion-tabla-corta">
+                    <h3>Vencen Este Mes</h3>
+                    <div class="contenedor-tabla">
+                        <table class="tabla-dashboard-ancho">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Tipo / Aseguradora</th>
+                                    <th>N° Póliza</th>
+                                    <th>Fin Vigencia</th>
+                                    <th>Días Restantes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-vencen-este-mes-inicio"></tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Tabla de Resultados + Botón Ver Historial -->
-                <div class="tarjeta-dashboard">
-                    <div class="encabezado-tarjeta-flex">
-                        <h2>Tabla de Resultados</h2>
-                        <button type="button" class="btn-verde-historial" id="btn-ir-historial">
-                            Ver Historial Completo
-                        </button>
-                    </div>
-
+                <div class="seccion-tabla-corta separador-bloque-tabla">
+                    <h3>Vencen el Próximo Mes</h3>
                     <div class="contenedor-tabla">
-                        <table class="tabla-dashboard-ancho tabla-resumen-ejecutivo">
+                        <table class="tabla-dashboard-ancho">
                             <thead>
                                 <tr>
-                                    <th>Tipo de Seguro</th>
-                                    <th>Activos</th>
-                                    <th>Por Vencer</th>
-                                    <th>Vencidos</th>
-                                    <th>Renovadas</th>
-                                    <th>Canceladas</th>
-
-
+                                    <th>Cliente</th>
+                                    <th>Tipo / Aseguradora</th>
+                                    <th>N° Póliza</th>
+                                    <th>Fin Vigencia</th>
+                                    <th>Días Restantes</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-resumen-general-inicio"></tbody>
+                            <tbody id="tabla-vencen-proximo-mes-inicio"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
+            </section>
 
-            </div>
-        </section>
+            <!-- TABLA DE REGISTRO -->
+            <section id="pantalla-registro" class="pantalla-modulo pantalla-oculta">
+                <h2>Registro de Pólizas</h2>
 
-        <!-- TABLA DE REGISTRO -->
-        <section id="pantalla-registro" class="pantalla-modulo pantalla-oculta">
-            <h2>Registro de Pólizas</h2>
+                <form id="form-registro-polizas">
 
-            <form id="form-registro-polizas">
-
-                <!-- Tipo de Póliza y Aseguradora -->
-                <div class="grupo-formulario">
-                    <label for="tipoPoliza">Tipo de Póliza</label>
-                    <select id="tipoPoliza">
-                        <option value="">-- Selecciona un tipo --</option>
-                        <option value="Vehículos Livianos">Vehículos Livianos</option>
-                        <option value="Vehículos Pesados">Vehículos Pesados</option>
-                        <option value="Responsabilidad Civil">Responsabilidad Civil</option>
-                        <option value="Accidentes Personales">Accidentes Personales</option>
-                        <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
-                        <option value="Equipo Electrónico">Equipo Electrónico</option>
-                        <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas</option>
-                        <option value="Incendio">Incendio</option>
-                        <option value="Multiriesgo">Multiriesgo</option>
-                        <option value="Vida Individual">Vida Individual</option>
-                    </select>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="aseguradora">Aseguradora</label>
-                    <select id="aseguradora">
-                        <option value="">-- Selecciona una aseguradora --</option>
-                        <option value="Latina">Latina</option>
-                        <option value="EquiSuiza">EquiSuiza</option>
-                        <option value="Sweaden">Sweaden</option>
-                        <option value="Alianza">Alianza</option>
-                        <option value="Atlantida">Atlantida</option>
-                        <option value="Zurich">Zurich</option>
-                        <option value="Privilegio CIA">Privilegio CIA</option>
-                        <option value="Aseguradora del Sur">Aseguradora del Sur</option>
-                    </select>
-                </div>
-
-                <!-- Cliente y Cédula/RUC -->
-                <div class="grupo-formulario">
-                    <label for="cliente">Cliente</label>
-                    <input type="text" id="cliente" placeholder="Nombre completo">
-                    <div id="sugerencia-cliente" class="sugerencias-flotantes"></div>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="cedulaRuc">Cédula o RUC</label>
-                    <input type="text" id="cedulaRuc" placeholder="Ej. 1723456789001">
-                    <div id="sugerencia-cedula" class="sugerencias-flotantes"></div>
-                </div>
-
-                <!-- Teléfono y Correo Electrónico -->
-                <div class="grupo-formulario">
-                    <label for="telefonoCliente">Teléfono</label>
-                    <input type="tel" id="telefonoCliente" placeholder="Ej. 0991234567">
-                    <div id="sugerencia-telefono" class="sugerencias-flotantes"></div>
-
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="emailCliente">Correo Electrónico</label>
-                    <input type="email" id="emailCliente" placeholder="Ej. cliente@email.com">
-                    <div id="sugerencia-email" class="sugerencias-flotantes"></div>
-                </div>
-
-                <!-- Número de Póliza y Placa/Información -->
-                <div class="grupo-formulario">
-                    <label for="numeroPoliza">Número de Póliza</label>
-                    <input type="text" id="numeroPoliza">
-                    <div id="sugerencia-poliza" class="sugerencias-flotantes"></div>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="placaDetalle">Placa o Información</label>
-                    <input type="text" id="placaDetalle" placeholder="Ej. PBC-1234 / Detalle general">
-                    <div id="sugerencia-detalle" class="sugerencias-flotantes"></div>
-                </div>
-
-                <!-- Valor Asegurado y Prima Neta  -->
-                <div class="grupo-formulario">
-                    <label for="valorAsigurado">Valor Asegurado</label>
-                    <input type="number" id="valorAsigurado" step="0.01" placeholder="Ej. 10000.00">
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="primaNeta">Prima Neta</label>
-                    <input type="number" id="primaNeta" step="0.01" placeholder="Ej. 450.00">
-                </div>
-
-                <!-- Inicio Vigencia y Fin Vigencia -->
-                <div class="grupo-formulario">
-                    <label for="inicioVigencia">Inicio Vigencia</label>
-                    <input type="date" id="inicioVigencia">
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="finVigencia">Fin Vigencia</label>
-                    <input type="date" id="finVigencia">
-                </div>
-
-                <!-- Código y Estado -->
-                <div class="grupo-formulario">
-                    <label for="codigoPoliza">Código</label>
-                    <input type="text" id="codigoPoliza" placeholder="Ej. COD-001">
-                    <div id="sugerencia-codigo" class="sugerencias-flotantes"></div>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label for="estadoPoliza">Estado</label>
-                    <select id="estadoPoliza">
-                        <option value="Activo">Activo</option>
-                        <option value="Por vencer">Próximo a vencer</option>
-                        <option value="Vencido">Vencido</option>
-                        <option value="Renovada">Renovada</option>
-                        <option value="Cancelada">Cancelada</option>
-                    </select>
-                </div>
-
-                <!-- Endoso Beneficiario-->
-                <div class="grupo-formulario" style="grid-column: 2;">
-                    <label for="endosoBeneficiario">Endoso Beneficiario</label>
-                    <select id="endosoBeneficiario">
-                        <option value="No">No</option>
-                        <option value="Sí">Sí</option>
-                    </select>
-                </div>
-
-                <!-- Botones de Acción y Subtextos Informativos -->
-                <div class="contenedor-acciones">
-                    <div class="bloque-boton">
-                        <button type="button" id="btn-registrar">Registrar nuevo cliente</button>
-                        <small>Agrega un nuevo cliente al historial.</small>
+                    <!-- Tipo de Póliza y Aseguradora -->
+                    <div class="grupo-formulario">
+                        <label for="tipoPoliza">Tipo de Póliza</label>
+                        <select id="tipoPoliza">
+                            <option value="">-- Selecciona un tipo --</option>
+                            <option value="Vehículos Livianos">Vehículos Livianos</option>
+                            <option value="Vehículos Pesados">Vehículos Pesados</option>
+                            <option value="Responsabilidad Civil">Responsabilidad Civil</option>
+                            <option value="Accidentes Personales">Accidentes Personales</option>
+                            <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
+                            <option value="Equipo Electrónico">Equipo Electrónico</option>
+                            <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas
+                            </option>
+                            <option value="Incendio">Incendio</option>
+                            <option value="Multiriesgo">Multiriesgo</option>
+                            <option value="Vida Individual">Vida Individual</option>
+                        </select>
                     </div>
 
-                    <div class="bloque-boton">
-                        <button type="button" id="btn-actualizar">Actualizar póliza</button>
-                        <small>Selecciona primero una póliza de la tabla para modificarla.</small>
+                    <div class="grupo-formulario">
+                        <label for="aseguradora">Aseguradora</label>
+                        <select id="aseguradora">
+                            <option value="">-- Selecciona una aseguradora --</option>
+                            <option value="Latina">Latina</option>
+                            <option value="EquiSuiza">EquiSuiza</option>
+                            <option value="Sweaden">Sweaden</option>
+                            <option value="Alianza">Alianza</option>
+                            <option value="Atlantida">Atlantida</option>
+                            <option value="Zurich">Zurich</option>
+                            <option value="Privilegio CIA">Privilegio CIA</option>
+                            <option value="Aseguradora del Sur">Aseguradora del Sur</option>
+                        </select>
                     </div>
 
-                    <div class="bloque-boton">
-                        <button type="button" id="btn-exportar">Exportar Excel</button>
-                        <small>Descarga el historial completo.</small>
+                    <!-- Cliente y Cédula/RUC -->
+                    <div class="grupo-formulario">
+                        <label for="cliente">Cliente</label>
+                        <input type="text" id="cliente" placeholder="Nombre completo">
+                        <div id="sugerencia-cliente" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="cedulaRuc">Cédula o RUC</label>
+                        <input type="text" id="cedulaRuc" placeholder="Ej. 1723456789001">
+                        <div id="sugerencia-cedula" class="sugerencias-flotantes"></div>
+                    </div>
+
+                   <!-- Solicitante / Cédula/RUC-->
+                    <div class="grupo-formulario">
+                        <label for="solicitante">Solicitante</label>
+                        <input type="text" id="solicitante" placeholder="Nombre completo">
+                        <div id="sugerencia-solicitante" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="cedulaRuc1">Cédula o RUC</label>
+                        <input type="text" id="cedulaRuc1" placeholder="Ej. 1723456789001">
+                        <div id="sugerencia-cedula1" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <!-- Teléfono y Correo Electrónico -->
+                    <div class="grupo-formulario">
+                        <label for="telefonoCliente">Teléfono</label>
+                        <input type="tel" id="telefonoCliente" placeholder="Ej. 0991234567">
+                        <div id="sugerencia-telefono" class="sugerencias-flotantes"></div>
+
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="emailCliente">Correo Electrónico</label>
+                        <input type="email" id="emailCliente" placeholder="Ej. cliente@email.com">
+                        <div id="sugerencia-email" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <!-- Número de Póliza y Placa/Información -->
+                    <div class="grupo-formulario">
+                        <label for="numeroPoliza">Número de Póliza</label>
+                        <input type="text" id="numeroPoliza">
+                        <div id="sugerencia-poliza" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="placaDetalle">Placa o Información</label>
+                        <input type="text" id="placaDetalle" placeholder="Ej. PBC-1234 / Detalle general">
+                        <div id="sugerencia-detalle" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <!-- Valor Asegurado y Prima Neta  -->
+                    <div class="grupo-formulario">
+                        <label for="valorAsigurado">Valor Asegurado</label>
+                        <input type="number" id="valorAsigurado" step="0.01" placeholder="Ej. 10000.00">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="primaNeta">Prima Neta</label>
+                        <input type="number" id="primaNeta" step="0.01" placeholder="Ej. 450.00">
+                    </div>
+
+                    <!-- Inicio Vigencia y Fin Vigencia -->
+                    <div class="grupo-formulario">
+                        <label for="inicioVigencia">Inicio Vigencia</label>
+                        <input type="date" id="inicioVigencia">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="finVigencia">Fin Vigencia</label>
+                        <input type="date" id="finVigencia">
+                    </div>
+
+                    <!-- Código y Estado -->
+                    <div class="grupo-formulario">
+                        <label for="codigoPoliza">Código</label>
+                        <input type="text" id="codigoPoliza" placeholder="Ej. COD-001">
+                        <div id="sugerencia-codigo" class="sugerencias-flotantes"></div>
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label for="estadoPoliza">Estado</label>
+                        <select id="estadoPoliza">
+                            <option value="Activo">Activo</option>
+                            <option value="Por vencer">Próximo a vencer</option>
+                            <option value="Renovada">Renovada</option>
+                            <option value="Cancelada">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <!-- Endoso Beneficiario-->
+                    <div class="grupo-formulario" style="grid-column: 2;">
+                        <label for="endosoBeneficiario">Endoso Beneficiario</label>
+                        <select id="endosoBeneficiario">
+                            <option value="No">No</option>
+                            <option value="Sí">Sí</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de Acción y Subtextos Informativos -->
+                    <div class="contenedor-acciones">
+                        <div class="bloque-boton">
+                            <button type="button" id="btn-registrar">Registrar nuevo cliente</button>
+                            <small>Agrega un nuevo cliente al historial.</small>
+                        </div>
+
+                        <div class="bloque-boton">
+                            <button type="button" id="btn-actualizar">Actualizar póliza</button>
+                            <small>Selecciona primero una póliza de la tabla para modificarla.</small>
+                        </div>
+
+                        <div class="bloque-boton">
+                            <button type="button" id="btn-exportar">Exportar Excel</button>
+                            <small>Descarga el historial completo.</small>
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- PÓLIZAS QUE VENCEN ESTE MES -->
+            <section id="pantalla-vencimientos" class="pantalla-modulo pantalla-oculta">
+                <h2>Pólizas por Vencer</h2>
+
+                <!-- Tabla 1: Vencen este mes -->
+                <div class="seccion-tabla">
+                    <h3>Pólizas que Vencen Este Mes</h3>
+                    <div class="contenedor-tabla">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Tipo Póliza</th>
+                                    <th>Aseguradora</th>
+                                    <th>N° Póliza</th>
+                                    <th>Fin Vigencia</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-vencen-este-mes"></tbody>
+                        </table>
                     </div>
                 </div>
 
-            </form>
-        </section>
+                <!-- Tabla 2: Vencen el próximo mes -->
+                <div class="seccion-tabla">
+                    <h3>Pólizas que Vencen el Próximo Mes</h3>
+                    <div class="contenedor-tabla">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Tipo Póliza</th>
+                                    <th>Aseguradora</th>
+                                    <th>N° Póliza</th>
+                                    <th>Fin Vigencia</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-vencen-proximo-mes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-        <!-- PÓLIZAS QUE VENCEN ESTE MES -->
-        <section id="pantalla-vencimientos" class="pantalla-modulo pantalla-oculta">
-            <h2>Pólizas por Vencer</h2>
+            <!-- HISTORIAL COMPLETO DE PÓLIZAS -->
+            <section id="pantalla-historial" class="pantalla-modulo pantalla-oculta">
+                <h2>Historial Completo</h2>
+                <p class="subtitulo-seccion">Selecciona el tipo de seguro para ver su historial.</p>
 
-            <!-- Tabla 1: Vencen este mes -->
-            <div class="seccion-tabla">
-                <h3>Pólizas que Vencen Este Mes</h3>
+                <!-- Filtro por Tipo de Póliza -->
+                <div class="contenedor-filtro">
+                    <div class="grupo-filtro-select">
+                        <label for="filtroTipoSeguro"><strong>Seleccionar tipo de seguro:</strong></label>
+                        <select id="filtroTipoSeguro" onchange="renderizarHistorialCompleto()">
+                            <option value="TODOS">-- Todos los tipos de seguro --</option>
+                            <option value="Vehículos Livianos">Vehículos Livianos</option>
+                            <option value="Vehículos Pesados">Vehículos Pesados</option>
+                            <option value="Responsabilidad Civil">Responsabilidad Civil</option>
+                            <option value="Accidentes Personales">Accidentes Personales</option>
+                            <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
+                            <option value="Equipo Electrónico">Equipo Electrónico</option>
+                            <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas
+                            </option>
+                            <option value="Incendio">Incendio</option>
+                            <option value="Multiriesgo">Multiriesgo</option>
+                            <option value="Vida Individual">Vida Individual</option>
+                        </select>
+                    </div>
+
+                    <!-- Barra de búsqueda centrada para el Historial -->
+                    <div class="buscador-historial-container">
+                        <span class="icono-buscar">🔍</span>
+                        <input type="text" id="inputBusquedaHistorial" placeholder="Buscar por cualquier item"
+                            onkeyup="renderizarHistorialCompleto()">
+                    </div>
+                </div>
+
+                <!-- Tabla de Historial Completo -->
                 <div class="contenedor-tabla">
                     <table>
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Cliente</th>
+                                <th>Cédula / RUC</th>
+                                <th>Solicitante</th>
+                                <th>cedulaRuc1</th>
+                                <th>Teléfono</th>
+                                <th>Correo</th>
+                                <th>Aseguradora</th>
                                 <th>Tipo Póliza</th>
-                                <th>Aseguradora</th>
                                 <th>N° Póliza</th>
-                                <th>Fin Vigencia</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-vencen-este-mes"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Tabla 2: Vencen el próximo mes -->
-            <div class="seccion-tabla">
-                <h3>Pólizas que Vencen el Próximo Mes</h3>
-                <div class="contenedor-tabla">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Tipo Póliza</th>
-                                <th>Aseguradora</th>
-                                <th>N° Póliza</th>
-                                <th>Fin Vigencia</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-vencen-proximo-mes"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- HISTORIAL COMPLETO DE PÓLIZAS -->
-        <section id="pantalla-historial" class="pantalla-modulo pantalla-oculta">
-            <h2>Historial Completo</h2>
-            <p class="subtitulo-seccion">Selecciona el tipo de seguro para ver su historial.</p>
-
-            <!-- Filtro por Tipo de Póliza -->
-            <div class="contenedor-filtro">
-                <div class="grupo-filtro-select">
-                    <label for="filtroTipoSeguro"><strong>Seleccionar tipo de seguro:</strong></label>
-                    <select id="filtroTipoSeguro" onchange="renderizarHistorialCompleto()">
-                        <option value="TODOS">-- Todos los tipos de seguro --</option>
-                        <option value="Vehículos Livianos">Vehículos Livianos</option>
-                        <option value="Vehículos Pesados">Vehículos Pesados</option>
-                        <option value="Responsabilidad Civil">Responsabilidad Civil</option>
-                        <option value="Accidentes Personales">Accidentes Personales</option>
-                        <option value="Cumplimiento de Contrato">Cumplimiento de Contrato</option>
-                        <option value="Equipo Electrónico">Equipo Electrónico</option>
-                        <option value="Equipo y Maquinaria de Contratistas">Equipo y Maquinaria de Contratistas</option>
-                        <option value="Incendio">Incendio</option>
-                        <option value="Multiriesgo">Multiriesgo</option>
-                        <option value="Vida Individual">Vida Individual</option>
-                    </select>
-                </div>
-
-                <!-- Barra de búsqueda centrada para el Historial -->
-                <div class="buscador-historial-container">
-                    <span class="icono-buscar">🔍</span>
-                    <input type="text" id="inputBusquedaHistorial"
-                        placeholder="Buscar por cualquier item"
-                        onkeyup="renderizarHistorialCompleto()">
-                </div>
-            </div>
-
-            <!-- Tabla de Historial Completo -->
-            <div class="contenedor-tabla">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Cliente</th>
-                            <th>Cédula / RUC</th>
-                            <th>Teléfono</th>
-                            <th>Correo</th>
-                            <th>Aseguradora</th>
-                            <th>Tipo Póliza</th>
-                            <th>N° Póliza</th>
-                            <th>Placa / Detalle</th>
-                            <th>Valor Asegurado</th>
-                            <th>Prima Neta</th>
-                            <th>Endoso Benenficiario</th>
-                            <th>Inicio Vigencia</th>
-                            <th>Fin Vigencia</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-historial-completo">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!--Tabla de Resultados-->
-        <section id="pantalla-resumen" class="pantalla-modulo pantalla-oculta">
-            <h2>Resumen General por Tipo de Póliza</h2>
-            <div class="contenedor-tabla contenedor-resumen">
-                <table class="tabla-resumen-ejecutivo">
-                    <thead>
-                        <tr>
-                            <th>Tipo de Seguro</th>
-                            <th>Activos</th>
-                            <th>Por Vencer</th>
-                            <th>Vencidos</th>
-                            <th>Renovadas</th>
-                            <th>Canceladas</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-resumen-general">
-                        <!-- Se llena dinámicamente con JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!--Gráfica Estadística-->
-        <section id="pantalla-grafica" class="pantalla-modulo pantalla-oculta">
-            <h2>Análisis Visual de Movimiento por Seguro</h2>
-            <div class="contenedor-grafico">
-                <canvas id="graficoVolumenSeguros"></canvas>
-            </div>
-        </section>
-    </main>
-
-    <!-- VENTANA FLOTANTE-Tabla de Resultados -->
-    <div id="modal-detalle-polizas" class="modal-oculto">
-        <div class="modal-contenido">
-            <div class="modal-encabezado">
-                <h3 id="modal-titulo">Detalle de Pólizas</h3>
-                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal"
-                    onclick="cerrarModalDetalle()">&times;</button>
-            </div>
-            <div class="modal-cuerpo">
-                <div class="contenedor-tabla">
-                    <table class="tabla-dashboard-ancho">
-                        <thead>
-                            <tr>
-                                <th>Nombre del Cliente</th>
-                                <th>Aseguradora</th>
                                 <th>Placa / Detalle</th>
-                                <th>Vigencia (Inicio - Fin)</th>
+                                <th>Valor Asegurado</th>
+                                <th>Prima Neta</th>
+                                <th>Endoso Benenficiario</th>
+                                <th>Inicio Vigencia</th>
+                                <th>Fin Vigencia</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tabla-modal-cuerpo">
-                            <!-- Se llena dinámicamente -->
+                        <tbody id="tabla-historial-completo">
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
+            </section>
+
+            <!--Tabla de Resultados-->
+            <section id="pantalla-resumen" class="pantalla-modulo pantalla-oculta">
+                <h2>Resumen General por Tipo de Póliza</h2>
+                <div class="contenedor-tabla contenedor-resumen">
+                    <table class="tabla-resumen-ejecutivo">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Seguro</th>
+                                <th>Activos</th>
+                                <th>Por Vencer</th>
+                                <th>Renovadas</th>
+                                <th>Canceladas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-resumen-general">
+                            <!-- Se llena dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!--Gráfica Estadística-->
+            <section id="pantalla-grafica" class="pantalla-modulo pantalla-oculta">
+                <h2>Análisis Visual de Movimiento por Seguro</h2>
+                <div class="contenedor-grafico">
+                    <canvas id="graficoVolumenSeguros"></canvas>
+                </div>
+            </section>
+    </main>
 
     <!-- MODAL-DETALLE COMPLETO DEL CLIENTE -->
     <div id="modal-ficha-cliente" class="modal-flotante modal-oculto">
@@ -521,6 +479,14 @@
                     <div class="campo-ficha">
                         <label>Cédula / RUC</label>
                         <p id="ficha-cedula">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Solicitante</label>
+                        <p id="ficha-solicitante">-</p>
+                    </div>
+                    <div class="campo-ficha">
+                        <label>Cédula / RUC</label>
+                        <p id="ficha-cedulaRuc1">-</p>
                     </div>
                     <div class="campo-ficha">
                         <label>Teléfono</label>
@@ -575,6 +541,64 @@
 
             <div class="modal-footer-ficha">
                 <button type="button" class="btn-secundario" onclick="cerrarModalFichaCliente()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Resumen por Tipo de Seguro (Tabla de Resultados Flotante) -->
+    <div id="modal-resumen-tipos" class="modal-oculto">
+        <div class="tarjeta-dashboard">
+            <div class="encabezado-tarjeta-flex">
+                <h2>Tabla de Resultados - Resumen Ejecutivo</h2>
+                <div>
+                    <button type="button" class="btn-verde-historial" id="btn-ir-historial">
+                        Ver Historial Completo
+                    </button>
+                    <button type="button" onclick="cerrarModalResumenTipos()">&times;</button>
+                </div>
+            </div>
+
+            <div class="contenedor-tabla">
+                <table class="tabla-dashboard-ancho tabla-resumen-ejecutivo">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Seguro</th>
+                            <th>Activos</th>
+                            <th>Por Vencer</th>
+                            <th>Renovadas</th>
+                            <th>Canceladas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-resumen-modal-general"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTANA FLOTANTE-Tabla de Resultados -->
+    <div id="modal-detalle-polizas" class="modal-oculto">
+        <div class="modal-contenido">
+            <div class="modal-encabezado">
+                <h3 id="modal-titulo">Detalle de Pólizas</h3>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal"
+                    onclick="cerrarModalDetalle()">&times;</button>
+            </div>
+            <div class="modal-cuerpo">
+                <div class="contenedor-tabla">
+                    <table class="tabla-dashboard-ancho">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Cliente</th>
+                                <th>Aseguradora</th>
+                                <th>Placa / Detalle</th>
+                                <th>Vigencia (Inicio - Fin)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-modal-cuerpo">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

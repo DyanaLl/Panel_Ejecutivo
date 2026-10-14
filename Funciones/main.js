@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderizarHistorialCompleto();
     }
     if (typeof renderizarResumenGeneral === "function") {
-        renderizarResumenGeneral();
+        renderizarResumenGeneral(); 
     }
 
     // 3. CAPTURAR BOTONES DEL FORMULARIO Y ACCIONES
@@ -82,8 +82,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnIrHistorial = document.getElementById("btn-ir-historial");
     if (btnIrHistorial) {
         btnIrHistorial.addEventListener("click", () => {
+            cerrarModalResumenTipos();
             const botonHistorialSidebar = document.querySelector('.item-menu[data-pantalla="pantalla-historial"]');
             if (botonHistorialSidebar) botonHistorialSidebar.click();
+        });
+    }
+
+    const btnAbrirResumen = document.getElementById("btn-abrir-resumen-modal");
+    if (btnAbrirResumen) {
+        btnAbrirResumen.addEventListener("click", () => {
+            abrirModalResumenTipos();
         });
     }
 
@@ -113,8 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderizarTablasVencimiento();
             } else if (idPantallaTarget === "pantalla-historial" && typeof renderizarHistorialCompleto === "function") {
                 renderizarHistorialCompleto();
-            } else if (idPantallaTarget === "pantalla-resumen" && typeof renderizarResumenGeneral === "function") {
-                renderizarResumenGeneral();
+            } else if (idPantallaTarget === "pantalla-resumen") {
+                abrirModalResumenTipos();
             } else if (idPantallaTarget === "pantalla-grafica" && typeof renderizarGraficoMovimiento === "function") {
                 renderizarGraficoMovimiento();
             }
@@ -131,18 +139,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function refrescarDashboardInicio() {
-    // A) Sincronizar Tabla de Resumen en la casita
-    const tablaResumenOriginal = document.getElementById("tabla-resumen-general");
-    const tablaResumenInicio = document.getElementById("tabla-resumen-general-inicio");
-    if (tablaResumenOriginal && tablaResumenInicio) {
-        tablaResumenInicio.innerHTML = tablaResumenOriginal.innerHTML;
-    }
-
-    // B) Sincronizar Tablas de Vencimientos
+    // Sincronizar Tablas de Vencimientos en la Casita
     procesarTablaParaInicio("tabla-vencen-este-mes", "tabla-vencen-este-mes-inicio");
     procesarTablaParaInicio("tabla-vencen-proximo-mes", "tabla-vencen-proximo-mes-inicio");
 
-    // C) DIBUJO DE LA GRÁFICA EN LA CASITA
+    // Dibujo de la gráfica en la Casita
     if (typeof renderizarGraficoMovimiento === "function") {
         renderizarGraficoMovimiento();
     }
@@ -235,14 +236,14 @@ function abrirModalDetalle(tipoSeguro, estadoFiltro) {
     const filtradas = listaPolizas.filter(p => {
         if (p.tipoPoliza !== tipoSeguro) return false;
 
-        const estado = String(p.estadoPoliza || "").toLowerCase();
+        const estado = String(p.estadoPoliza || "").toLowerCase().trim();
 
         if (estadoFiltro === "Activo") {
-            return estado.includes("activo") || estado.includes("vigente");
+            return estado.includes("activ") || estado.includes("vigente");
         } else if (estadoFiltro === "Por Vencer") {
-            return estado.includes("próximo") || estado.includes("proximo") || estado.includes("pendiente");
+            return estado.includes("próxim") || estado.includes("proxim") || estado.includes("pendiente");
         } else if (estadoFiltro === "Vencido") {
-            return estado.includes("vencid") || estado.includes("cancelad");
+            return estado.includes("vencid");
         } else if (estadoFiltro === "Renovada") {
             return estado.includes("renovad");
         } else if (estadoFiltro === "Cancelada") {
@@ -426,18 +427,38 @@ function cerrarModalFichaCliente() {
 
 //SUGERENCIAS-REGISTRO
 // Escuchadores en tiempo real para activar las sugerencias flotantes en cada input crítico
-    const camposMonitoreadosValidacion = [
-        "cliente", "cedulaRuc", "telefonoCliente", 
-        "emailCliente", "numeroPoliza", "placaDetalle", "codigoPoliza"
-    ];
+const camposMonitoreadosValidacion = [
+    "cliente", "cedulaRuc", "telefonoCliente",
+    "emailCliente", "numeroPoliza", "placaDetalle", "codigoPoliza"
+];
 
-    camposMonitoreadosValidacion.forEach(id => {
-        const inputElem = document.getElementById(id);
-        if (inputElem) {
-            inputElem.addEventListener("input", () => {
-                if (typeof verificarSimilitudesYBloqueo === "function") {
-                    verificarSimilitudesYBloqueo();
-                }
-            });
+camposMonitoreadosValidacion.forEach(id => {
+    const inputElem = document.getElementById(id);
+    if (inputElem) {
+        inputElem.addEventListener("input", () => {
+            if (typeof verificarSimilitudesYBloqueo === "function") {
+                verificarSimilitudesYBloqueo();
+            }
+        });
+    }
+});
+
+// ABRIR MODAL DE RESUMEN POR TIPO DE SEGURO
+function abrirModalResumenTipos() {
+    const modal = document.getElementById("modal-resumen-tipos");
+    if (modal) {
+        modal.classList.remove("modal-oculto");
+        // Forzar renderizado inmediato al abrir
+        if (typeof renderizarResumenGeneral === "function") {
+            renderizarResumenGeneral();
         }
-    });
+    }
+}
+
+// CERRAR MODAL DE RESUMEN POR TIPO DE SEGURO
+function cerrarModalResumenTipos() {
+    const modal = document.getElementById("modal-resumen-tipos");
+    if (modal) {
+        modal.classList.add("modal-oculto");
+    }
+}

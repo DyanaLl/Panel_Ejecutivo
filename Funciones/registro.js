@@ -147,6 +147,8 @@ function seleccionarPolizaParaEdicion(index) {
     document.getElementById("aseguradora").value = poliza.aseguradora;
     document.getElementById("cliente").value = poliza.cliente;
     document.getElementById("cedulaRuc").value = poliza.cedulaRuc;
+    document.getElementById("solicitante").value = poliza.solicitante;
+    document.getElementById("cedulaRuc1").value = poliza.cedulaRuc1;
     document.getElementById("telefonoCliente").value = poliza.telefono || "";
     document.getElementById("emailCliente").value = poliza.email || "";
     document.getElementById("numeroPoliza").value = poliza.numeroPoliza;
@@ -210,6 +212,8 @@ function limpiarFormularioRegistro() {
     document.getElementById("aseguradora").value = "";
     document.getElementById("cliente").value = "";
     document.getElementById("cedulaRuc").value = "";
+    document.getElementById("solicitante").value = "";
+    document.getElementById("cedulaRuc1").value = "";
     document.getElementById("telefonoCliente").value = "";
     document.getElementById("emailCliente").value = "";
     document.getElementById("numeroPoliza").value = "";
@@ -237,11 +241,13 @@ function exportarPolizasAExcel() {
 
     const libro = XLSX.utils.book_new();
 
-    // 1. Datos de las pólizas
+    // 1. Datos de las pólizas (17 columnas en orden exacto al HTML)
     const datosExcel = [
         [
             "Código",
             "Cliente",
+            "Cédula / RUC",
+            "Solicitante",
             "Cédula / RUC",
             "Teléfono",
             "Correo",
@@ -261,29 +267,35 @@ function exportarPolizasAExcel() {
     polizas.forEach(p => {
         datosExcel.push([
             p.codigo || p.codigoPoliza || "N/A",
-            p.cliente,
-            p.cedulaRuc,
-            p.aseguradora,
-            p.tipoPoliza,
-            p.numeroPoliza,
-            p.placaDetalle,
-            p.valorAsigurado,
-            p.primaNeta,
-            p.endosoBeneficiario,
-            p.inicioVigencia,
-            p.finVigencia,
-            p.estadoPoliza
+            p.cliente || "N/A",
+            p.cedulaRuc || "N/A",
+            p.solicitante || "N/A",
+            p.cedulaRuc1 || "N/A",
+            p.telefono || p.telefonoCliente || "N/A",
+            p.email || p.correo || p.emailCliente || "N/A",
+            p.aseguradora || "N/A",
+            p.tipoPoliza || "N/A",
+            p.numeroPoliza || "N/A",
+            p.placaDetalle || "N/A",
+            p.valorAsigurado || "0.00",
+            p.primaNeta || "0.00",
+            p.endosoBeneficiario || "No",
+            p.inicioVigencia || "N/A",
+            p.finVigencia || "N/A",
+            p.estadoPoliza || "Pendiente"
         ]);
     });
 
     const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
 
-    // 2. Ancho de las 9 columnas de pólizas
+    // 2. Ancho de las 17 columnas
     hoja["!cols"] = [
         { wch: 14 }, // Código
         { wch: 25 }, // Cliente
         { wch: 16 }, // Cédula/RUC
-        { wch: 18 }, // Teléfono
+        { wch: 25 }, // Solicitante
+        { wch: 16 }, // Cédula/RUC 1
+        { wch: 16 }, // Teléfono
         { wch: 22 }, // Correo
         { wch: 18 }, // Aseguradora
         { wch: 22 }, // Tipo de Póliza
@@ -297,8 +309,8 @@ function exportarPolizasAExcel() {
         { wch: 18 }  // Estado
     ];
 
-    // 3. Filtro automático
-    hoja["!autofilter"] = { ref: `A1:I${datosExcel.length}` };
+    // 3. Filtro automático ajustado a las 17 columnas (A hasta Q)
+    hoja["!autofilter"] = { ref: `A1:Q${datosExcel.length}` };
 
     // 4. Configuración de Estilos
     const estiloEncabezado = {
@@ -324,20 +336,20 @@ function exportarPolizasAExcel() {
         }
     };
 
-    // Aplicar estilo a Encabezados
-    for (let c = 0; c < 15; c++) {
+    // Aplicar estilo a Encabezados (17 columnas: índice 0 al 16)
+    for (let c = 0; c < 17; c++) {
         const dir = XLSX.utils.encode_cell({ r: 0, c });
         if (hoja[dir]) hoja[dir].s = estiloEncabezado;
     }
 
     // Aplicar estilo a Filas de Datos
     for (let f = 1; f < datosExcel.length; f++) {
-        for (let c = 0; c < 15; c++) {
+        for (let c = 0; c < 17; c++) {
             const dir = XLSX.utils.encode_cell({ r: f, c });
             if (!hoja[dir]) continue;
 
-            // Centrar código, cédula, póliza, placa y fechas
-            const esCentro = [0, 2, 7, 8, 9, 10, 11, 12, 13].includes(c);
+            // Centrar código, cédula, póliza, placa, valores y fechas
+            const esCentro = [0, 2, 4, 9, 10, 11, 12, 13, 14, 15].includes(c);
 
             hoja[dir].s = {
                 ...estiloCeldaBase,
@@ -346,8 +358,8 @@ function exportarPolizasAExcel() {
             };
         }
 
-        // Estilo Estado
-        const dirEstado = XLSX.utils.encode_cell({ r: f, c: 14 });
+        // Estilo Estado (Columna 16, que es la última)
+        const dirEstado = XLSX.utils.encode_cell({ r: f, c: 16 });
         const celdaEst = hoja[dirEstado];
 
         if (celdaEst) {
@@ -537,6 +549,8 @@ function renderizarHistorialCompleto() {
         const codigo = String(p.codigo || p.codigoPoliza || "").toLowerCase();
         const cliente = String(p.cliente || "").toLowerCase();
         const cedulaRuc = String(p.cedulaRuc || "").toLowerCase();
+        const solicitante = String(p.solicitante || "").toLowerCase();
+        const cedulaRuc1 = String(p.cedulaRuc1 || "").toLowerCase();
         const telefono = String(p.telefono || p.telefonoCliente || "").toLowerCase();
         const email = String(p.email || p.correo || p.emailCliente || "").toLowerCase();
         const aseguradora = String(p.aseguradora || "").toLowerCase();
@@ -553,6 +567,8 @@ function renderizarHistorialCompleto() {
         return codigo.includes(textoBusqueda) ||
                cliente.includes(textoBusqueda) ||
                cedulaRuc.includes(textoBusqueda) ||
+               solicitante.includes(textoBusqueda) ||
+               cedulaRuc1.includes(textoBusqueda) ||
                telefono.includes(textoBusqueda) ||
                email.includes(textoBusqueda) ||
                aseguradora.includes(textoBusqueda) ||
@@ -585,6 +601,8 @@ function renderizarHistorialCompleto() {
                 <td><strong>${p.codigo || p.codigoPoliza || "-"}</strong></td>
                 <td>${p.cliente}</td>
                 <td>${p.cedulaRuc}</td>
+                <td>${p.solicitante}</td>
+                <td>${p.cedulaRuc1}</td>
                 <td>${p.telefono}</td>
                 <td>${p.email}</td>
                 <td>${p.aseguradora}</td>
@@ -612,7 +630,7 @@ function renderizarHistorialCompleto() {
 
 function renderizarResumenGeneral() {
     const tablaResumen = document.getElementById("tabla-resumen-general");
-    if (!tablaResumen) return;
+    const tablaResumenModal = document.getElementById("tabla-resumen-modal-general");
 
     // Tipos de Seguros
     const tipos = [
@@ -642,14 +660,14 @@ function renderizarResumenGeneral() {
         let canceladas = 0;
 
         polizasDelTipo.forEach(p => {
-            const estado = String(p.estadoPoliza).toLowerCase();
-            if (estado === "renovada" || estado.includes("renovad")) {
+            const estado = String(p.estadoPoliza || "").toLowerCase().trim();
+            if (estado.includes("renovad")) {
                 renovadas++;
-            } else if (estado === "cancelada" || estado.includes("cancelad")) {
+            } else if (estado.includes("cancelad")) {
                 canceladas++;
-            } else if (estado.includes("activo") || estado.includes("vigente")) {
+            } else if (estado.includes("activ") || estado.includes("vigente")) {
                 activos++;
-            } else if (estado.includes("próximo") || estado.includes("proximo") || estado.includes("pendiente")) {
+            } else if (estado.includes("próxim") || estado.includes("proxim")) {
                 porVencer++;
             } else if (estado.includes("vencid")) {
                 vencidos++;
@@ -679,5 +697,7 @@ function renderizarResumenGeneral() {
         `;
     });
 
-    tablaResumen.innerHTML = htmlFilas;
+    // Inyectar filas en ambas tablas para mantenerlas sincronizadas
+    if (tablaResumen) tablaResumen.innerHTML = htmlFilas;
+    if (tablaResumenModal) tablaResumenModal.innerHTML = htmlFilas;
 }
