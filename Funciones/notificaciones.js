@@ -3,7 +3,7 @@ const EMAILJS_CONFIG = {
     SERVICE_ID: "service_sbvs893",    // Tu Service ID
     TEMPLATE_ID: "template_gffiwwf",   // Tu Template ID
     PUBLIC_KEY: "-Ed9Y1UQA95iBMfTZ",   // Tu Public Key
-    CORREO_DESTINO: "foxandinaec@gmail.com"
+    CORREO_DESTINO: "llivipumadiana31@gmail.com"
 };
 
 // Inicializar EmailJS con la clave pública
