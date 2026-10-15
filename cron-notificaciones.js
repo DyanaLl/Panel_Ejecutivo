@@ -119,10 +119,13 @@ async function ejecutarChequeoDiario() {
             const numPoliza = p.numeroPoliza || p.numPoliza || p.poliza || "S/N";
             const clienteNombre = p.cliente || p.nombreCliente || "Cliente Registrado";
 
-            console.log(`Póliza N° ${numPoliza} (${clienteNombre}): Faltan ${diasRestantes} días (Vence: ${fechaFinStr}).`);
+            const tieneEndoso = String(p.endosoBeneficiario || "").toLowerCase() === "sí" || String(p.endosoBeneficiario || "").toLowerCase() === "si";
+            
+            // Definir los días permitidos según el endoso
+            const diasPermitidos = tieneEndoso ? [45, 30, 15, 10, 5, 0] : [10, 5, 0];
 
-            // Evaluar alertas exactas (10, 5 o 0 días)
-            if (diasRestantes === 10 || diasRestantes === 5 || diasRestantes === 0) {
+            // Evaluar si los días restantes coinciden con los hitos permitidos
+            if (diasPermitidos.includes(diasRestantes)) {
                 console.log(` ¡Coincidencia de alerta hallada! Enviando correo para póliza N° ${numPoliza}...`);
 
                 const datosCorreo = {
@@ -135,6 +138,46 @@ async function ejecutarChequeoDiario() {
                     placa_detalle: p.placaDetalle || p.placa || p.detalle || "-",
                     fin_vigencia: fechaFinStr
                 };
+
+                if (tieneEndoso) {
+                    if (diasRestantes === 45) {
+                    datosCorreo.asunto_correo = `[Endoso Beneficiario - 45 Días] Póliza de ${clienteNombre} requiere gestión anticipada`;
+                    datosCorreo.nivel_urgencia = "GESTIÓN ANTICIPADA (ENDOSO)";
+                    datosCorreo.mensaje_cabecera = `Aviso especial: La póliza de ${clienteNombre} cuenta con ENDOSO BENEFICIARIO y vence en 45 días. Requiere mayor tiempo de anticipación para su trámite.`;
+                    datosCorreo.badge_estado = "Endoso | Vence en 45 días";
+                    datosCorreo.mensaje_pie = "Por favor, inicie la gestión anticipada requerida por el endoso beneficiario.";
+                } else if (diasRestantes === 30) {
+                    datosCorreo.asunto_correo = `[Endoso Beneficiario - 30 Días] Seguimiento de póliza de ${clienteNombre}`;
+                    datosCorreo.nivel_urgencia = "SEGUIMIENTO PREVENTIVO (ENDOSO)";
+                    datosCorreo.mensaje_cabecera = `Recordatorio: Faltan 30 días para el vencimiento de la póliza con ENDOSO BENEFICIARIO de ${clienteNombre}. Continúe con el proceso de renovación.`;
+                    datosCorreo.badge_estado = "Endoso | Vence en 30 días";
+                    datosCorreo.mensaje_pie = "Realice la gestión de esta póliza con endoso.";
+                } else if (diasRestantes === 15) {
+                    datosCorreo.asunto_correo = `[Endoso Beneficiario - 15 Días] Alerta prioritaria póliza de ${clienteNombre}`;
+                    datosCorreo.nivel_urgencia = "AVISO PRIORITARIO (ENDOSO)";
+                    datosCorreo.mensaje_cabecera = `Atención: Quedan 15 días para el vencimiento de la póliza con ENDOSO BENEFICIARIO de ${clienteNombre}. Se requiere agilizar las gestiones.`;
+                    datosCorreo.badge_estado = "Endoso | Vence en 15 días";
+                    datosCorreo.mensaje_pie = "Realice la gestión de esta póliza con endoso.";
+                } else if (diasRestantes === 10) {
+                    datosCorreo.asunto_correo = `[Endoso Beneficiario] Póliza de ${clienteNombre} vence en 10 días`;
+                    datosCorreo.nivel_urgencia = "RECORDATORIO URGENTE (ENDOSO)";
+                    datosCorreo.mensaje_cabecera = `La póliza con ENDOSO BENEFICIARIO de ${clienteNombre} está a 10 días de vencer.`;
+                    datosCorreo.badge_estado = "Endoso | Vence en 10 días";
+                    datosCorreo.mensaje_pie = "Realice la gestión de esta póliza de forma prioritaria debido a las condiciones del endoso.";
+                } else if (diasRestantes === 5) {
+                    datosCorreo.asunto_correo = `[Endoso Beneficiario - ALTA] Póliza de ${clienteNombre} vence en 5 días`;
+                    datosCorreo.nivel_urgencia = "CRÍTICO (ENDOSO BENEFICIARIO)";
+                    datosCorreo.mensaje_cabecera = `Quedan únicamente 5 días para el vencimiento de la póliza con ENDOSO BENEFICIARIO de ${clienteNombre}.`;
+                    datosCorreo.badge_estado = "Endoso | Vence en 5 días";
+                    datosCorreo.mensaje_pie = "Urgente: Confirmar la renovación inmediata para evitar afectaciones por el endoso.";
+                } else if (diasRestantes === 0) {
+                    datosCorreo.asunto_correo = `[URGENTE HOY - ENDOSO] Póliza de ${clienteNombre} vence HOY`;
+                    datosCorreo.nivel_urgencia = "¡ALERTA MÁXIMA VENCIMIENTO HOY!";
+                    datosCorreo.mensaje_cabecera = `Alerta crítica: La póliza con ENDOSO BENEFICIARIO de ${clienteNombre} vence el día de hoy.`;
+                    datosCorreo.badge_estado = "Endoso | ¡VENCE HOY!";
+                    datosCorreo.mensaje_pie = "Acción inmediata requerida hoy mismo.";
+                }
+                } else {
 
                 if (diasRestantes === 10) {
                     datosCorreo.asunto_correo = `[Recordatorio Interno] Póliza de ${clienteNombre} vence en 10 días`;
@@ -155,6 +198,7 @@ async function ejecutarChequeoDiario() {
                     datosCorreo.badge_estado = "¡VENCE HOY!";
                     datosCorreo.mensaje_pie = "Realizar llamada o gestión prioritaria hoy mismo.";
                 }
+            }
 
                 await enviarCorreoEmailJS(datosCorreo);
                 alertasEnviadas++;
