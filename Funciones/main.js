@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderizarHistorialCompleto();
     }
     if (typeof renderizarResumenGeneral === "function") {
-        renderizarResumenGeneral(); 
+        renderizarResumenGeneral();
     }
 
     // 3. CAPTURAR BOTONES DEL FORMULARIO Y ACCIONES
@@ -428,7 +428,7 @@ function cerrarModalFichaCliente() {
 //SUGERENCIAS-REGISTRO
 // Escuchadores en tiempo real para activar las sugerencias flotantes en cada input crítico
 const camposMonitoreadosValidacion = [
-    "cliente", "cedulaRuc", "telefonoCliente",
+    "cliente", "cedulaRuc", "solicitante", "cedulaRuc1", "telefonoCliente",
     "emailCliente", "numeroPoliza", "placaDetalle", "codigoPoliza"
 ];
 

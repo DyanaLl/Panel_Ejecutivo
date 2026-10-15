@@ -47,6 +47,8 @@ function obtenerYValidarDatosFormulario() {
     const aseguradora = document.getElementById('aseguradora').value.trim();
     const cliente = document.getElementById('cliente').value.trim();
     const cedulaRuc = document.getElementById('cedulaRuc').value.trim();
+    const solicitante = document.getElementById('solicitante').value.trim(); 
+    const cedulaRuc1 = document.getElementById('cedulaRuc1').value.trim();
     const telefonoCliente = document.getElementById('telefonoCliente').value.trim();
     const emailCliente = document.getElementById('emailCliente').value.trim();
     const numeroPoliza = document.getElementById('numeroPoliza').value.trim();
@@ -72,6 +74,11 @@ function obtenerYValidarDatosFormulario() {
         return null;
     }
 
+    if (cedulaRuc1 !== "" && !validarCedulaRuc(cedulaRuc1)) {
+        alert("El número de Cédula o RUC del solicitante no tiene un formato válido.");
+        return null;
+    }
+    
     // Validación de Teléfono (si fue ingresado)
     if (telefonoCliente !== "" && !validarTelefono(telefonoCliente)) {
         alert("El número de teléfono ingresado no es válido.");
@@ -95,6 +102,8 @@ function obtenerYValidarDatosFormulario() {
         aseguradora,
         cliente,
         cedulaRuc,
+        solicitante,
+        cedulaRuc1,
         telefono: telefonoCliente, 
         email: emailCliente,       
         numeroPoliza,
@@ -130,6 +139,8 @@ function validarFormularioPoliza() {
 function verificarSimilitudesYBloqueo() {
     const clienteVal = document.getElementById("cliente").value.trim().toLowerCase();
     const cedulaVal = document.getElementById("cedulaRuc").value.trim().toLowerCase();
+    const solicitanteVal = document.getElementById("solicitante") ? document.getElementById("solicitante").value.trim().toLowerCase() : "";
+    const cedulaRuc1Val = document.getElementById("cedulaRuc1") ? document.getElementById("cedulaRuc1").value.trim().toLowerCase() : "";
     const telVal = document.getElementById("telefonoCliente").value.trim().toLowerCase();
     const emailVal = document.getElementById("emailCliente").value.trim().toLowerCase();
     const numPolizaVal = document.getElementById("numeroPoliza").value.trim().toLowerCase();
@@ -138,6 +149,8 @@ function verificarSimilitudesYBloqueo() {
 
     const sugCliente = document.getElementById("sugerencia-cliente");
     const sugCedula = document.getElementById("sugerencia-cedula");
+    const sugSolicitante = document.getElementById("sugerencia-solicitante");
+    const sugCedula1 = document.getElementById("sugerencia-cedula1");
     const sugTel = document.getElementById("sugerencia-telefono");
     const sugEmail = document.getElementById("sugerencia-email");
     const sugPoliza = document.getElementById("sugerencia-poliza");
@@ -148,7 +161,7 @@ function verificarSimilitudesYBloqueo() {
     let bloquearRegistro = false;
 
     // Limpiar sugerencias previas en cada pulsación
-    const contenedores = [sugCliente, sugCedula, sugTel, sugEmail, sugPoliza, sugDetalle, sugCodigo];
+    const contenedores = [sugCliente, sugCedula, sugSolicitante, sugCedula1, sugTel, sugEmail, sugPoliza, sugDetalle, sugCodigo];
     contenedores.forEach(sug => {
         if (sug) { sug.style.display = "none"; sug.textContent = ""; }
     });
@@ -162,29 +175,47 @@ function verificarSimilitudesYBloqueo() {
         }
         const pCliente = String(p.cliente || "").toLowerCase();
         const pCedula = String(p.cedulaRuc || "").toLowerCase();
+        const pSolicitante = String(p.solicitante || "").toLowerCase();
+        const pCedula1 = String(p.cedulaRuc1 || "").toLowerCase();
         const pTel = String(p.telefono || p.telefonoCliente || "").toLowerCase();
         const pEmail = String(p.email || p.correo || "").toLowerCase();
         const pNumPoliza = String(p.numeroPoliza || "").toLowerCase();
         const pDetalle = String(p.placaDetalle || "").toLowerCase();
         const pCodigo = String(p.codigo || p.codigoPoliza || "").toLowerCase();
 
-        // 1. Cliente (Sugerencia informativa - NO bloquea)
-        if (clienteVal.length > 2 && pCliente.includes(clienteVal)) {
+        // 1. Cliente (Sugerencia cruzada con cliente o solicitante anterior)
+        if (clienteVal.length > 2 && (pCliente.includes(clienteVal) || pSolicitante.includes(clienteVal))) {
             if (sugCliente) {
-                sugCliente.textContent = `ℹ️ Sugerencia: Ya existe un cliente similar ("${p.cliente}").`;
+                sugCliente.textContent = `ℹ️ Sugerencia: Hay similitud con el cliente/solicitante previo ("${p.cliente || p.solicitante}").`;
                 sugCliente.style.display = "block";
             }
         }
 
-        // 2. Cédula o RUC (Sugerencia informativa de cliente recurrente - NO bloquea)
-        if (cedulaVal.length > 4 && pCedula.includes(cedulaVal)) {
+        // 2. Cédula o RUC del Cliente (Sugerencia cruzada)
+        if (cedulaVal.length > 4 && (pCedula.includes(cedulaVal) || pCedula1.includes(cedulaVal))) {
             if (sugCedula) {
-                sugCedula.textContent = `ℹ️ Sugerencia: Esta Cédula/RUC ya está registrada para ${p.cliente}.`;
+                sugCedula.textContent = `ℹ️ Sugerencia: Esta Cédula/RUC ya está registrada en el sistema (${p.cliente || p.solicitante}).`;
                 sugCedula.style.display = "block";
             }
         }
 
-        // 3. Teléfono (Sugerencia - NO bloquea)
+        // 3. Solicitante (Sugerencia cruzada buscando tanto en clientes como en solicitantes previos)
+        if (solicitanteVal.length > 2 && (pSolicitante.includes(solicitanteVal) || pCliente.includes(solicitanteVal))) {
+            if (sugSolicitante) {
+                sugSolicitante.textContent = `ℹ️ Sugerencia: El solicitante coincide con registros previos ("${p.solicitante || p.cliente}").`;
+                sugSolicitante.style.display = "block";
+            }
+        }
+
+        // 4. Cédula o RUC del Solicitante (Sugerencia cruzada de identificación)
+        if (cedulaRuc1Val.length > 4 && (pCedula1.includes(cedulaRuc1Val) || pCedula.includes(cedulaRuc1Val))) {
+            if (sugCedula1) {
+                sugCedula1.textContent = `ℹ️ Sugerencia: Esta Cédula/RUC de solicitante ya figura asociada a (${p.solicitante || p.cliente}).`;
+                sugCedula1.style.display = "block";
+            }
+        }
+        
+        // 5. Teléfono (Sugerencia - NO bloquea)
         if (telVal.length > 5 && pTel.includes(telVal)) {
             if (sugTel) {
                 sugTel.textContent = `ℹ️ Sugerencia: Este teléfono pertenece a ${p.cliente}.`;
@@ -192,7 +223,7 @@ function verificarSimilitudesYBloqueo() {
             }
         }
 
-        // 4. Correo Electrónico (Sugerencia - NO bloquea)
+        // 6. Correo Electrónico (Sugerencia - NO bloquea)
         if (emailVal.length > 4 && pEmail.includes(emailVal)) {
             if (sugEmail) {
                 sugEmail.textContent = `ℹ️ Sugerencia: Este correo ya fue usado antes.`;
@@ -200,7 +231,7 @@ function verificarSimilitudesYBloqueo() {
             }
         }
 
-        // 5. Número de Póliza (BLOQUEO ESTRICTO - Jamás se puede repetir)
+        // 7. Número de Póliza (BLOQUEO ESTRICTO - Jamás se puede repetir)
         if (numPolizaVal && pNumPoliza === numPolizaVal) {
             bloquearRegistro = true;
             if (sugPoliza) {
@@ -209,7 +240,7 @@ function verificarSimilitudesYBloqueo() {
             }
         }
 
-        // 6. Placa o Detalle (Sugerencia - NO bloquea)
+        // 8. Placa o Detalle (Sugerencia - NO bloquea)
         if (detalleVal.length > 3 && pDetalle.includes(detalleVal)) {
             if (sugDetalle) {
                 sugDetalle.textContent = `ℹ️ Sugerencia: Esta placa o detalle ya registra otra póliza.`;
