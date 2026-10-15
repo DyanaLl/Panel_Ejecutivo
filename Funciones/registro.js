@@ -402,13 +402,23 @@ function exportarPolizasAExcel() {
 
 // TABLA DE PÓLIZAS-MES DE VENCIMIENTO
 
+// Función auxiliar para calcular días restantes de una póliza
+function obtenerDiasRestantesPoliza(poliza) {
+    if (!poliza.finVigencia) return 999999;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
+    const diffMs = fechaFin - hoy;
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+}
+
 // 1. Pólizas que vencen ESTE MES
 function obtenerPolizasVencenEsteMes() {
     const hoy = new Date();
     const mesActual = hoy.getMonth();
     const anioActual = hoy.getFullYear();
 
-    return polizas.filter(poliza => {
+    const filtradas = polizas.filter(poliza => {
         if (!poliza.finVigencia) return false;
 
         // Validar que el estado no sea Renovada ni Cancelada
@@ -417,11 +427,22 @@ function obtenerPolizasVencenEsteMes() {
             return false;
         }
 
-        // Convertimos la fecha (YYYY-MM-DD)
         const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
+        if (fechaFin.getMonth() !== mesActual || fechaFin.getFullYear() !== anioActual) {
+            return false;
+        }
 
-        return fechaFin.getMonth() === mesActual && fechaFin.getFullYear() === anioActual;
+        // Verificar umbral de aparición según Endoso Beneficiario
+        const tieneEndoso = String(poliza.endosoBeneficiario || "").toLowerCase() === "sí" || String(poliza.endosoBeneficiario || "").toLowerCase() === "si";
+        const diasRestantes = obtenerDiasRestantesPoliza(poliza);
+        const umbralPermitido = tieneEndoso ? 45 : 10;
+
+        // Aparece si ya venció, es hoy, o está dentro del umbral de días permitido (o si por calendario cae este mes pero supera el umbral, se muestra solo si ya está muy cerca o vencida)
+        return diasRestantes <= umbralPermitido;
     });
+
+    // Ordenar por prioridad (las que tengan menos días restantes o estén vencidas van primero)
+    return filtradas.sort((a, b) => obtenerDiasRestantesPoliza(a) - obtenerDiasRestantesPoliza(b));
 }
 
 // 2. Pólizas que vencen EL PRÓXIMO MES
@@ -437,7 +458,7 @@ function obtenerPolizasVencenProximoMes() {
         anioProximo++;
     }
 
-    return polizas.filter(poliza => {
+    const filtradas = polizas.filter(poliza => {
         if (!poliza.finVigencia) return false;
 
         // Validar que el estado no sea Renovada ni Cancelada
@@ -447,9 +468,21 @@ function obtenerPolizasVencenProximoMes() {
         }
 
         const fechaFin = new Date(poliza.finVigencia + "T00:00:00");
+        if (fechaFin.getMonth() !== mesProximo || fechaFin.getFullYear() !== anioProximo) {
+            return false;
+        }
 
-        return fechaFin.getMonth() === mesProximo && fechaFin.getFullYear() === anioProximo;
+        // Verificar umbral de aparición según Endoso Beneficiario
+        const tieneEndoso = String(poliza.endosoBeneficiario || "").toLowerCase() === "sí" || String(poliza.endosoBeneficiario || "").toLowerCase() === "si";
+        const diasRestantes = obtenerDiasRestantesPoliza(poliza);
+        const umbralPermitido = tieneEndoso ? 45 : 10;
+
+        // Solo se muestran si los días restantes caen dentro del umbral correspondiente (ej. 45 días para endoso, 10 para normales)
+        return diasRestantes <= umbralPermitido;
     });
+
+    // Ordenar por prioridad (menor cantidad de días restantes primero)
+    return filtradas.sort((a, b) => obtenerDiasRestantesPoliza(a) - obtenerDiasRestantesPoliza(b));
 }
 
 // Rendizar-Tablas de Vencimiento
@@ -557,30 +590,30 @@ function renderizarHistorialCompleto() {
         const tipoPoliza = String(p.tipoPoliza || "").toLowerCase();
         const numeroPoliza = String(p.numeroPoliza || "").toLowerCase();
         const placaDetalle = String(p.placaDetalle || "").toLowerCase();
-        const valorAsigurado = String (p.valorAsigurado || "").toLowerCase();
-        const primaNeta = String (p.primaNeta || "").toLowerCase();
-        const endosoBeneficiario = String (p.endosoBeneficiario|| "").toLowerCase();
+        const valorAsigurado = String(p.valorAsigurado || "").toLowerCase();
+        const primaNeta = String(p.primaNeta || "").toLowerCase();
+        const endosoBeneficiario = String(p.endosoBeneficiario || "").toLowerCase();
         const inicioVigencia = String(p.inicioVigencia || "").toLowerCase();
         const finVigencia = String(p.finVigencia || "").toLowerCase();
         const estadoPoliza = String(p.estadoPoliza || "").toLowerCase();
 
         return codigo.includes(textoBusqueda) ||
-               cliente.includes(textoBusqueda) ||
-               cedulaRuc.includes(textoBusqueda) ||
-               solicitante.includes(textoBusqueda) ||
-               cedulaRuc1.includes(textoBusqueda) ||
-               telefono.includes(textoBusqueda) ||
-               email.includes(textoBusqueda) ||
-               aseguradora.includes(textoBusqueda) ||
-               tipoPoliza.includes(textoBusqueda) ||
-               numeroPoliza.includes(textoBusqueda) ||
-               placaDetalle.includes(textoBusqueda) ||
-               valorAsigurado.includes(textoBusqueda) ||
-               primaNeta.includes(textoBusqueda) ||
-               endosoBeneficiario.includes(textoBusqueda) ||
-               inicioVigencia.includes(textoBusqueda) ||
-               finVigencia.includes(textoBusqueda) ||
-               estadoPoliza.includes(textoBusqueda);
+            cliente.includes(textoBusqueda) ||
+            cedulaRuc.includes(textoBusqueda) ||
+            solicitante.includes(textoBusqueda) ||
+            cedulaRuc1.includes(textoBusqueda) ||
+            telefono.includes(textoBusqueda) ||
+            email.includes(textoBusqueda) ||
+            aseguradora.includes(textoBusqueda) ||
+            tipoPoliza.includes(textoBusqueda) ||
+            numeroPoliza.includes(textoBusqueda) ||
+            placaDetalle.includes(textoBusqueda) ||
+            valorAsigurado.includes(textoBusqueda) ||
+            primaNeta.includes(textoBusqueda) ||
+            endosoBeneficiario.includes(textoBusqueda) ||
+            inicioVigencia.includes(textoBusqueda) ||
+            finVigencia.includes(textoBusqueda) ||
+            estadoPoliza.includes(textoBusqueda);
     });
 
     if (polizasFiltradas.length === 0) {
