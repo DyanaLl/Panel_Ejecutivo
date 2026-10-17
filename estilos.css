@@ -375,6 +375,72 @@ table tbody tr:hover {
   background-color: #b91c1c;
 }
 
+/* Panel de Botones A-Z */
+.contenedor-abecedario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-letra-abc {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-letra-abc:hover,
+.btn-letra-abc.activa {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Tarjetas/Cuadro Resumido de Clientes */
+.contenedor-resumen-clientes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 15px 0;
+}
+
+.tarjeta-cliente-resumen {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tarjeta-cliente-resumen:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tarjeta-cliente-resumen .nombre-cliente {
+  font-weight: bold;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.tarjeta-cliente-resumen .cedula-cliente {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
 /* TABLA DE RESULTADOS */
 /* ==========================================
    ESTILOS NUEVOS: BOTÓN RESUMEN Y MODAL FLOTANTE
@@ -1141,20 +1207,21 @@ main {
 
 /*Sugerencias en el registro de póliza*/
 .sugerencias-flotantes {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background-color: #fef3c7;
-    border: 1px solid #f59e0b;
-    color: #92400e;
-    padding: 6px 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-    z-index: 100;
-    margin-top: 2px;
-    box-sizing: border-box;
-    display: none; /* Oculto por defecto para no saturar */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  margin-top: 2px;
+  box-sizing: border-box;
+  display: none;
+  /* Oculto por defecto para no saturar */
 }

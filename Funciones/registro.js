@@ -552,19 +552,50 @@ function eliminarPoliza(index) {
 }
 
 // RENDERIZADO TABLA HISTORIAL COMPLETO
+// Variable de estado para controlar la letra seleccionada actualmente en el abecedario (por defecto null o "TODOS")
+let letraSeleccionadaHistorial = null;
 
 function renderizarHistorialCompleto() {
     const tablaHistorial = document.getElementById("tabla-historial-completo");
     const comboFiltro = document.getElementById("filtroTipoSeguro");
     const inputBusqueda = document.getElementById("inputBusquedaHistorial");
+    const contenedorAbecedario = document.getElementById("contenedor-abecedario-historial");
+    const contenedorResumen = document.getElementById("contenedor-resumen-clientes");
+    const contenedorTabla = document.getElementById("seccion-tabla-historial");
 
     if (!tablaHistorial || !comboFiltro) return;
+
+    // 1. Renderizar la barra de abecedario (A-Z) si aún está vacía
+    if (contenedorAbecedario && contenedorAbecedario.children.length === 0) {
+        let letrasHTML = `<button type="button" class="btn-letra-abc ${letraSeleccionadaHistorial === null ? 'activa' : ''}" onclick="filtrarPorLetraHistorial(null)">TODOS</button>`;
+        for (let i = 65; i <= 90; i++) {
+            const letra = String.fromCharCode(i);
+            const activa = letraSeleccionadaHistorial === letra ? 'activa' : '';
+            letrasHTML += `<button type="button" class="btn-letra-abc ${activa}" onclick="filtrarPorLetraHistorial('${letra}')">${letra}</button>`;
+        }
+        contenedorAbecedario.innerHTML = letrasHTML;
+    }
 
     const tipoSeleccionado = comboFiltro.value;
     const textoBusqueda = inputBusqueda ? inputBusqueda.value.toLowerCase().trim() : "";
 
+    // REGLA DE VISTA LIMPIA: Si no se ha escrito nada en la búsqueda, 
+    // no se ha elegido un tipo de seguro específico, ni se ha presionado ninguna letra del abecedario,
+    // Ocultamos por completo tanto el resumen de tarjetas como la tabla principal.
+    const hayFiltroActivo = (tipoSeleccionado !== "TODOS" && tipoSeleccionado !== "") || 
+                          (textoBusqueda !== "") || 
+                          (letraSeleccionadaHistorial !== null);
+
+    if (!hayFiltroActivo) {
+        if (contenedorResumen) contenedorResumen.classList.add("pantalla-oculta");
+        if (contenedorTabla) contenedorTabla.classList.add("pantalla-oculta");
+        return;
+    }
+
     if (polizas.length === 0) {
         tablaHistorial.innerHTML = `<tr><td colspan="10" class="sin-datos">No hay pólizas registradas en el sistema.</td></tr>`;
+        if (contenedorResumen) contenedorResumen.classList.add("pantalla-oculta");
+        if (contenedorTabla) contenedorTabla.classList.remove("pantalla-oculta");
         return;
     }
 
@@ -575,6 +606,14 @@ function renderizarHistorialCompleto() {
         // 1. Filtro por Select de Tipo de Seguro
         const coincideTipo = (tipoSeleccionado === "TODOS" || tipoSeleccionado === "" || p.tipoPoliza === tipoSeleccionado);
         if (!coincideTipo) return false;
+
+        // 2. Filtro por Letra Inicial del Cliente 
+        if (letraSeleccionadaHistorial !== null) {
+            const nombreCliente = String(p.cliente || "").trim().toUpperCase();
+            if (!nombreCliente.startsWith(letraSeleccionadaHistorial)) {
+                return false;
+            }
+        }
 
         // 2. Filtro por Texto en Todos los Campos
         if (textoBusqueda === "") return true;
@@ -616,8 +655,31 @@ function renderizarHistorialCompleto() {
             estadoPoliza.includes(textoBusqueda);
     });
 
+    /// LÓGICA DE NIVELES: Si se seleccionó una letra (y NO se está usando la barra de búsqueda de texto),
+    // mostramos el cuadro resumido con tarjetas de Nombre y Cédula.
+    if (letraSeleccionadaHistorial !== null && textoBusqueda === "" && contenedorResumen) {
+        if (contenedorTabla) contenedorTabla.classList.add("pantalla-oculta");
+        contenedorResumen.classList.remove("pantalla-oculta");
+
+        if (polizasFiltradas.length === 0) {
+            tablaHistorial.innerHTML = `<tr><td colspan="13" class="sin-datos">No se encontraron pólizas que coincidan con la búsqueda.</td></tr>`;
+        } else {
+            contenedorResumen.innerHTML = polizasFiltradas.map(p => `
+                <div class="tarjeta-cliente-resumen" onclick="mostrarDetalleFilaHistorial(${p.indexReal})">
+                    <div class="nombre-cliente">${p.cliente || "Sin Nombre"}</div>
+                    <div class="cedula-cliente">RUC/Cédula: ${p.cedulaRuc || "N/A"}</div>
+                </div>
+            `).join("");
+        }
+        return;
+    }
+
+    // Si no hay letra seleccionada o se está usando la barra de búsqueda general, mostramos la tabla completa
+    if (contenedorResumen) contenedorResumen.classList.add("pantalla-oculta");
+    if (contenedorTabla) contenedorTabla.classList.remove("pantalla-oculta");
+
     if (polizasFiltradas.length === 0) {
-        tablaHistorial.innerHTML = `<tr><td colspan="13" class="sin-datos">No se encontraron pólizas que coincidan con la búsqueda.</td></tr>`;
+        tablaHistorial.innerHTML = `<tr><td colspan="17" class="sin-datos">No se encontraron pólizas que coincidan con la búsqueda.</td></tr>`;
         return;
     }
 
@@ -657,6 +719,72 @@ function renderizarHistorialCompleto() {
             </tr>
         `;
     }).join("");
+}
+
+// Funciones auxiliares de control para los clics en el abecedario y tarjetas
+function filtrarPorLetraHistorial(letra) {
+    letraSeleccionadaHistorial = letra;
+
+    // Actualizar clases activas visuales en los botones del abecedario
+    const botones = document.querySelectorAll('.btn-letra-abc');
+    botones.forEach(btn => {
+        if ((letra === null && btn.textContent === "TODOS") || btn.textContent === letra) {
+            btn.classList.add('activa');
+        } else {
+            btn.classList.remove('activa');
+        }
+    });
+
+    renderizarHistorialCompleto();
+}
+
+function mostrarDetalleFilaHistorial(indexReal) {
+    const contenedorResumen = document.getElementById("contenedor-resumen-clientes");
+    const contenedorTabla = document.getElementById("seccion-tabla-historial");
+    const tablaHistorial = document.getElementById("tabla-historial-completo");
+
+    if (!contenedorResumen || !contenedorTabla || !tablaHistorial) return;
+
+    // Ocultar tarjetas resumidas y mostrar únicamente la tabla con la fila seleccionada
+    contenedorResumen.classList.add("pantalla-oculta");
+    contenedorTabla.classList.remove("pantalla-oculta");
+
+    const p = polizas[indexReal];
+    if (!p) return;
+
+    let claseEstado = "badge-pendiente";
+    const estadoNorm = String(p.estadoPoliza || "").toLowerCase();
+    if (estadoNorm.includes("activo") || estadoNorm.includes("renovad")) claseEstado = "badge-activo";
+    else if (estadoNorm.includes("vencid") || estadoNorm.includes("cancelad")) claseEstado = "badge-vencido";
+
+    // Renderizar solo esta fila específica para que el usuario vea su barra completa
+    tablaHistorial.innerHTML = `
+        <tr>
+            <td><strong>${p.codigo || p.codigoPoliza || "-"}</strong></td>
+            <td>${p.cliente || "-"}</td>
+            <td>${p.cedulaRuc || "-"}</td>
+            <td>${p.solicitante || "-"}</td>
+            <td>${p.cedulaRuc1 || "-"}</td>
+            <td>${p.telefono || "-"}</td>
+            <td>${p.email || "-"}</td>
+            <td>${p.aseguradora || "-"}</td>
+            <td>${p.tipoPoliza || "-"}</td>
+            <td>${p.numeroPoliza || "-"}</td>
+            <td>${p.placaDetalle || "-"}</td>
+            <td>${p.valorAsigurado || "-"}</td>
+            <td>${p.primaNeta || "-"}</td>
+            <td>${p.endosoBeneficiario || "-"}</td>
+            <td>${p.inicioVigencia || "-"}</td>
+            <td>${p.finVigencia || "-"}</td>
+            <td><span class="badge ${claseEstado}">${p.estadoPoliza || "Registrada"}</span></td>
+            <td>
+                <div class="contenedor-acciones-tabla">
+                    <button type="button" class="btn-tabla btn-editar" onclick="seleccionarPolizaParaEdicion(${indexReal})"> + Editar</button>
+                    <button type="button" class="btn-tabla btn-eliminar" onclick="eliminarPoliza(${indexReal})">Eliminar</button>
+                </div>
+            </td>
+        </tr>
+    `;
 }
 
 // RENDERIZADO-TABLA DE RESULTADOS
