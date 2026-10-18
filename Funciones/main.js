@@ -122,7 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (idPantallaTarget === "pantalla-historial" && typeof renderizarHistorialCompleto === "function") {
                 renderizarHistorialCompleto();
             } else if (idPantallaTarget === "pantalla-resumen") {
-                abrirModalResumenTipos();
+                if (typeof renderizarResumenGeneral === "function") {
+                    renderizarResumenGeneral();
+                }
             } else if (idPantallaTarget === "pantalla-grafica" && typeof renderizarGraficoMovimiento === "function") {
                 renderizarGraficoMovimiento();
             }
@@ -137,6 +139,24 @@ document.addEventListener("DOMContentLoaded", () => {
         refrescarDashboardInicio(); // En caso de emergencia, carga los datos
     }
 });
+
+// Botón para exportar Excel filtrado por mes
+const btnExportarMes = document.getElementById("btn-exportar-mes");
+if (btnExportarMes) {
+    btnExportarMes.addEventListener("click", () => {
+        const selectMes = document.getElementById("select-mes-exportar");
+        if (!selectMes || !selectMes.value) {
+            alert("Por favor, seleccione un mes válido para realizar la descarga.");
+            return;
+        }
+        const mesSeleccionado = parseInt(selectMes.value, 10);
+        if (typeof exportarPolizasPorMesAExcel === "function") {
+            exportarPolizasPorMesAExcel(mesSeleccionado);
+        } else {
+            alert("La función de exportación mensual está pendiente de integración.");
+        }
+    });
+}
 
 function refrescarDashboardInicio() {
     // Sincronizar Tablas de Vencimientos en la Casita

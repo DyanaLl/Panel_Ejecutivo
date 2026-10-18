@@ -442,23 +442,55 @@
         <!--Tabla de Resultados-->
         <section id="pantalla-resumen" class="pantalla-modulo pantalla-oculta">
             <h2>Resumen General por Tipo de Póliza</h2>
-            <div class="contenedor-tabla contenedor-resumen">
-                <table class="tabla-resumen-ejecutivo">
-                    <thead>
-                        <tr>
-                            <th>Tipo de Seguro</th>
-                            <th>Activos</th>
-                            <th>Por Vencer</th>
-                            <th>Renovadas</th>
-                            <th>Canceladas</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-resumen-general">
-                        <!-- Se llena dinámicamente con JS -->
-                    </tbody>
-                </table>
+
+            <!-- Contenedor de la retícula de 12 meses (4x3) -->
+            <div id="grid-meses-resumen" class="grid-meses-container">
+                <!-- Generado dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Sección de Descarga de Excel por Mes -->
+            <div class="seccion-descarga-mensual" style="margin-top: 30px; text-align: center;">
+                <select id="select-mes-exportar" class="combo-selector-mes">
+                    <option value="">-- Seleccione un mes para obtener Excel --</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+                <button type="button" id="btn-exportar-mes" class="btn-exportar-mes-estilo">Descargar Excel del
+                    Mes</button>
             </div>
         </section>
+
+        <!-- Modal Centralizado para Mostrar Clientes del Mes -->
+        <div id="modal-detalle-mes" class="modal-oculto modal-contenedor-general">
+            <div class="modal-contenido-interno">
+                <span class="btn-cerrar-modal" onclick="cerrarModalMes()">&times;</span>
+                <h3 id="modal-mes-titulo">Registros del Mes</h3>
+                <div class="contenedor-tabla-modal">
+                    <table class="tabla-modal-generica">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Cédula / RUC</th>
+                                <th>Fin de Vigencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-mes-cuerpo">
+                            <!-- Se llena dinámicamente con JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <!--Gráfica Estadística-->
         <section id="pantalla-grafica" class="pantalla-modulo pantalla-oculta">

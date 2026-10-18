@@ -400,6 +400,209 @@ function exportarPolizasAExcel() {
     XLSX.writeFile(libro, "Historial_Polizas_Fox.xlsx");
 }
 
+// Polizas a descargar por MES
+function exportarPolizasPorMesAExcel(numeroMes) {
+    if (typeof polizas === "undefined" || polizas.length === 0) {
+        alert("No hay pólizas registradas para exportar.");
+        return;
+    }
+
+    if (typeof XLSX === "undefined") {
+        console.error("La librería XLSX no está cargada.");
+        return;
+    }
+
+    const nombresMeses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    const nombreMes = nombresMeses[numeroMes - 1] || "Mes";
+
+    // 1. Filtrar pólizas por el MES de FIN DE VIGENCIA
+    const polizasDelMes = polizas.filter(p => {
+        const fechaFinStr = p.finVigencia || p.fechaFin || "";
+        if (!fechaFinStr) return false;
+        
+        const partes = fechaFinStr.split("-");
+        if (partes.length >= 2) {
+            const mesPoliza = parseInt(partes[1], 10);
+            return mesPoliza === numeroMes;
+        }
+        return false;
+    });
+
+    if (polizasDelMes.length === 0) {
+        alert(`No hay pólizas que vencen en el mes de ${nombreMes} para exportar.`);
+        return;
+    }
+
+    // 2. Ordenar cronológicamente por el DÍA de FIN DE VIGENCIA (del día más cercano al 1 en adelante)
+    polizasDelMes.sort((a, b) => {
+        const fechaFinA = new Date(a.finVigencia || a.fechaFin || 0);
+        const fechaFinB = new Date(b.finVigencia || b.fechaFin || 0);
+        return fechaFinA - fechaFinB;
+    });
+
+    const libro = XLSX.utils.book_new();
+
+    // 3. Estructura idéntica de 17 columnas
+    const datosExcel = [
+        [
+            "Código",
+            "Cliente",
+            "Cédula / RUC",
+            "Solicitante",
+            "Cédula / RUC",
+            "Teléfono",
+            "Correo",
+            "Aseguradora",
+            "Tipo de Póliza",
+            "N° Póliza",
+            "Placa / Detalle",
+            "Valor Asegurado",
+            "Prima Neta",
+            "Endoso Beneficiario",
+            "Inicio Vigencia",
+            "Fin Vigencia",
+            "Estado"
+        ]
+    ];
+
+    polizasDelMes.forEach(p => {
+        datosExcel.push([
+            p.codigo || p.codigoPoliza || "N/A",
+            p.cliente || "N/A",
+            p.cedulaRuc || "N/A",
+            p.solicitante || "N/A",
+            p.cedulaRuc1 || "N/A",
+            p.telefono || p.telefonoCliente || "N/A",
+            p.email || p.correo || p.emailCliente || "N/A",
+            p.aseguradora || "N/A",
+            p.tipoPoliza || "N/A",
+            p.numeroPoliza || "N/A",
+            p.placaDetalle || "N/A",
+            p.valorAsigurado || "0.00",
+            p.primaNeta || "0.00",
+            p.endosoBeneficiario || "No",
+            p.inicioVigencia || "N/A",
+            p.finVigencia || "N/A",
+            p.estadoPoliza || "Pendiente"
+        ]);
+    });
+
+    const hoja = XLSX.utils.aoa_to_sheet(datosExcel);
+
+    // 4. Ancho de las 17 columnas
+    hoja["!cols"] = [
+        { wch: 14 }, // Código
+        { wch: 25 }, // Cliente
+        { wch: 16 }, // Cédula/RUC
+        { wch: 25 }, // Solicitante
+        { wch: 16 }, // Cédula/RUC 1
+        { wch: 16 }, // Teléfono
+        { wch: 22 }, // Correo
+        { wch: 18 }, // Aseguradora
+        { wch: 22 }, // Tipo de Póliza
+        { wch: 14 }, // N° Póliza
+        { wch: 16 }, // Placa / Detalle
+        { wch: 16 }, // Valor Asegurado
+        { wch: 14 }, // Prima Neta
+        { wch: 18 }, // Endoso Beneficiario
+        { wch: 15 }, // Inicio Vigencia
+        { wch: 15 }, // Fin Vigencia
+        { wch: 18 }  // Estado
+    ];
+
+    // 5. Autofiltro
+    hoja["!autofilter"] = { ref: `A1:Q${datosExcel.length}` };
+
+    // 6. Estilos exactamente iguales al Excel original
+    const estiloEncabezado = {
+        font: { name: "Calibri", bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
+        fill: { fgColor: { rgb: "1F4E78" } },
+        alignment: { horizontal: "center", vertical: "center" },
+        border: {
+            top: { style: "thin", color: { rgb: "D9E1F2" } },
+            bottom: { style: "thin", color: { rgb: "D9E1F2" } },
+            left: { style: "thin", color: { rgb: "D9E1F2" } },
+            right: { style: "thin", color: { rgb: "D9E1F2" } }
+        }
+    };
+
+    const estiloCeldaBase = {
+        font: { name: "Calibri", sz: 11 },
+        alignment: { vertical: "center" },
+        border: {
+            top: { style: "thin", color: { rgb: "E2E8F0" } },
+            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+            left: { style: "thin", color: { rgb: "E2E8F0" } },
+            right: { style: "thin", color: { rgb: "E2E8F0" } }
+        }
+    };
+
+    // Aplicar estilo a Encabezados
+    for (let c = 0; c < 17; c++) {
+        const dir = XLSX.utils.encode_cell({ r: 0, c });
+        if (hoja[dir]) hoja[dir].s = estiloEncabezado;
+    }
+
+    // Aplicar estilo a Filas de Datos
+    for (let f = 1; f < datosExcel.length; f++) {
+        for (let c = 0; c < 17; c++) {
+            const dir = XLSX.utils.encode_cell({ r: f, c });
+            if (!hoja[dir]) continue;
+
+            const esCentro = [0, 2, 4, 9, 10, 11, 12, 13, 14, 15].includes(c);
+
+            hoja[dir].s = {
+                ...estiloCeldaBase,
+                alignment: { horizontal: esCentro ? "center" : "left", vertical: "center" },
+                fill: { fgColor: { rgb: f % 2 === 0 ? "F2F4F7" : "FFFFFF" } }
+            };
+        }
+
+        // Estilo según estado
+        const dirEstado = XLSX.utils.encode_cell({ r: f, c: 16 });
+        const celdaEst = hoja[dirEstado];
+
+        if (celdaEst) {
+            const val = String(celdaEst.v).toLowerCase();
+
+            if (val.includes("activo") || val.includes("vigente")) {
+                celdaEst.s = {
+                    ...estiloCeldaBase,
+                    font: { bold: true, color: { rgb: "276A3C" } },
+                    fill: { fgColor: { rgb: "E2F0D9" } },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            } else if (val.includes("vencid") || val.includes("cancelad")) {
+                celdaEst.s = {
+                    ...estiloCeldaBase,
+                    font: { bold: true, color: { rgb: "9C0006" } },
+                    fill: { fgColor: { rgb: "FFC7CE" } },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            } else {
+                celdaEst.s = {
+                    ...estiloCeldaBase,
+                    font: { bold: true, color: { rgb: "7F6000" } },
+                    fill: { fgColor: { rgb: "FFF2CC" } },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+        }
+    }
+
+    hoja["!rows"] = [
+        { hpt: 25 },
+        ...Array(datosExcel.length - 1).fill({ hpt: 20 })
+    ];
+
+    XLSX.utils.book_append_sheet(libro, hoja, `Vencimientos ${nombreMes}`);
+    XLSX.writeFile(libro, `Historial_Polizas_Vencimiento_${nombreMes}_Fox.xlsx`);
+}
+
 // TABLA DE PÓLIZAS-MES DE VENCIMIENTO
 
 // Función auxiliar para calcular días restantes de una póliza
@@ -788,77 +991,88 @@ function mostrarDetalleFilaHistorial(indexReal) {
 }
 
 // RENDERIZADO-TABLA DE RESULTADOS
-
 function renderizarResumenGeneral() {
-    const tablaResumen = document.getElementById("tabla-resumen-general");
-    const tablaResumenModal = document.getElementById("tabla-resumen-modal-general");
+    const contenedorGrid = document.getElementById("grid-meses-resumen");
+    if (!contenedorGrid) return;
 
-    // Tipos de Seguros
-    const tipos = [
-        "Vehículos Livianos",
-        "Vehículos Pesados",
-        "Responsabilidad Civil",
-        "Accidentes Personales",
-        "Cumplimiento de Contrato",
-        "Equipo Electrónico",
-        "Equipo y Maquinaria de Contratistas",
-        "Incendio",
-        "Multiriesgo",
-        "Vida Individual",
+    const nombresMeses = [
+        "Enero", "Febrero", "Marzo", "Abril", 
+        "Mayo", "Junio", "Julio", "Agosto", 
+        "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ];
 
-    let htmlFilas = "";
-
-    tipos.forEach(tipo => {
-        // Filtrar pólizas que pertenecen a determinado tipo de seguro
-        const polizasDelTipo = typeof polizas !== "undefined" ? polizas.filter(p => p.tipoPoliza === tipo) : [];
-
-        // Contar por estados
-        let activos = 0;
-        let porVencer = 0;
-        let vencidos = 0;
-        let renovadas = 0;
-        let canceladas = 0;
-
-        polizasDelTipo.forEach(p => {
-            const estado = String(p.estadoPoliza || "").toLowerCase().trim();
-            if (estado.includes("renovad")) {
-                renovadas++;
-            } else if (estado.includes("cancelad")) {
-                canceladas++;
-            } else if (estado.includes("activ") || estado.includes("vigente")) {
-                activos++;
-            } else if (estado.includes("próxim") || estado.includes("proxim")) {
-                porVencer++;
-            } else if (estado.includes("vencid")) {
-                vencidos++;
-            }
-        });
-
-        htmlFilas += `
-            <tr>
-                <td><strong>${tipo}</strong></td>
-                <td>
-                    <span class="badge badge-activo contador-interactivo" 
-                          onclick="abrirModalDetalle('${tipo}', 'Activo')">${activos}</span>
-                </td>
-                <td>
-                    <span class="badge badge-pendiente contador-interactivo" 
-                          onclick="abrirModalDetalle('${tipo}', 'Por Vencer')">${porVencer}</span>
-                </td>
-                <td>
-                    <span class="badge badge-activo contador-interactivo" 
-                          onclick="abrirModalDetalle('${tipo}', 'Renovada')">${renovadas}</span>
-                </td>
-                <td>
-                    <span class="badge badge-vencido contador-interactivo" 
-                          onclick="abrirModalDetalle('${tipo}', 'Cancelada')">${canceladas}</span>
-                </td>
-            </tr>
+    let htmlMeses = "";
+    nombresMeses.forEach((mesNombre, index) => {
+        const numeroMes = index + 1; // 1 al 12
+        htmlMeses += `
+            <div class="tarjeta-mes-item" onclick="abrirModalMes(${numeroMes}, '${mesNombre}')">
+                <div class="nombre-mes-titulo">${mesNombre}</div>
+                <div class="info-mes-badge">Ver registros</div>
+            </div>
         `;
     });
 
-    // Inyectar filas en ambas tablas para mantenerlas sincronizadas
-    if (tablaResumen) tablaResumen.innerHTML = htmlFilas;
-    if (tablaResumenModal) tablaResumenModal.innerHTML = htmlFilas;
+    contenedorGrid.innerHTML = htmlMeses;
+}
+
+// Función para abrir el modal del mes seleccionado con orden cronológico estricto
+function abrirModalMes(numeroMes, nombreMes) {
+    const modal = document.getElementById("modal-detalle-mes");
+    const titulo = document.getElementById("modal-mes-titulo");
+    const cuerpoTabla = document.getElementById("tabla-mes-cuerpo");
+
+    if (!modal || !cuerpoTabla) return;
+
+    titulo.textContent = `Pólizas que vencen en ${nombreMes}`;
+
+    const listaPolizas = typeof polizas !== "undefined" ? polizas : [];
+
+    // Filtrar pólizas que correspondan al mes seleccionado
+    const polizasDelMes = listaPolizas.filter(p => {
+        const fechaFinStr = p.finVigencia || p.fechaFin || "";
+        if (!fechaFinStr) return false;
+        
+        const partes = fechaFinStr.split("-");
+        if (partes.length >= 2) {
+            const mesPoliza = parseInt(partes[1], 10);
+            return mesPoliza === numeroMes;
+        }
+        return false;
+    });
+
+    // Ordenar cronológicamente (del día más cercano al 1 hacia adelante)
+    polizasDelMes.sort((a, b) => {
+        const fechaFinA = new Date(a.finVigencia || a.fechaFin || 0);
+        const fechaFinB = new Date(b.finVigencia || b.fechaFin || 0);
+        return fechaFinA - fechaFinB;
+    });
+
+    if (polizasDelMes.length === 0) {
+        cuerpoTabla.innerHTML = `<tr><td colspan="3" class="mensaje-tabla-vacia">No hay clientes registrados en ${nombreMes}.</td></tr>`;
+    } else {
+        let filas = "";
+        polizasDelMes.forEach(p => {
+            const cliente = p.cliente || p.nombreCliente || "Sin Nombre";
+            const cedula = p.cedulaRuc || p.cedula || p.ruc || "N/A";
+            const fechaFin = p.finVigencia || p.fechaFin || "-";
+
+            filas += `
+                <tr>
+                    <td><strong>${cliente}</strong></td>
+                    <td>${cedula}</td>
+                    <td>${fechaFin}</td>
+                </tr>
+            `;
+        });
+        cuerpoTabla.innerHTML = filas;
+    }
+
+    modal.classList.remove("modal-oculto");
+}
+
+function cerrarModalMes() {
+    const modal = document.getElementById("modal-detalle-mes");
+    if (modal) {
+        modal.classList.add("modal-oculto");
+    }
 }
