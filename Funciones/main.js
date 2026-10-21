@@ -117,8 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
             // Actualizar vistas según la pantalla seleccionada
             if (idPantallaTarget === "pantalla-inicio") {
                 refrescarDashboardInicio();
-            } else if (idPantallaTarget === "pantalla-vencimientos" && typeof renderizarTablasVencimiento === "function") {
-                renderizarTablasVencimiento();
+            } else if (idPantallaTarget === "pantalla-vencimientos") {
+                // El módulo corporativo de empresas se maneja mediante su buscador en tiempo real
+                const inputEmpresas = document.getElementById("inputBusquedaEmpresas");
+                if (inputEmpresas && inputEmpresas.value === "") {
+                    limpiarBusquedaEmpresas();
+                }
             } else if (idPantallaTarget === "pantalla-historial" && typeof renderizarHistorialCompleto === "function") {
                 renderizarHistorialCompleto();
             } else if (idPantallaTarget === "pantalla-resumen") {

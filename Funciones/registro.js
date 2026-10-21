@@ -423,7 +423,7 @@ function exportarPolizasPorMesAExcel(numeroMes) {
     const polizasDelMes = polizas.filter(p => {
         const fechaFinStr = p.finVigencia || p.fechaFin || "";
         if (!fechaFinStr) return false;
-        
+
         const partes = fechaFinStr.split("-");
         if (partes.length >= 2) {
             const mesPoliza = parseInt(partes[1], 10);
@@ -688,21 +688,179 @@ function obtenerPolizasVencenProximoMes() {
     return filtradas.sort((a, b) => obtenerDiasRestantesPoliza(a) - obtenerDiasRestantesPoliza(b));
 }
 
-// Rendizar-Tablas de Vencimiento
+// ==========================================
+// Tercer Icóno - GRUPOS DE EMPRESAS Y ORGANIZACIONES
+// ==========================================
 
-function renderizarTablasVencimiento() {
-    const tablaEsteMes = document.getElementById("tabla-vencen-este-mes");
-    const tablaProximoMes = document.getElementById("tabla-vencen-proximo-mes");
+// Función auxiliar para detectar si un nombre tiene un perfil corporativo/empresa coherente
+function esNombreEmpresaCoherente(nombre) {
+    if (!nombre) return false;
+    const n = nombre.toUpperCase();
+    const terminosEmpresa = [
+        "S.A.", "SA", "C.A.", "CA", "LTDA", "CIA", "COMPANIA", "COMPAÑIA",
+        "CORP", "CORPORACION", "CONSTRUCTORA", "INMOBILIARIA", "SERVICIOS",
+        "INVERSIONES", "DISTRIBUIDORA", "IMPORT", "EXPORT", "HOLDING", "GROUP"
+    ];
+    return terminosEmpresa.some(termino => n.includes(termino));
+}
 
-    if (!tablaEsteMes || !tablaProximoMes) return;
+// Validar si una identificación corresponde a un RUC corporativo válido (13 dígitos)
+function esRucEmpresaValido(identificacion) {
+    if (!identificacion) return false;
+    const val = String(identificacion).trim();
+    // RUC válido de 13 dígitos terminados típicamente en 001 (o al menos 13 dígitos numéricos)
+    return /^\d{13}$/.test(val);
+}
 
-    // 1. Dibujar pólizas que vencen ESTE MES
-    const listaEsteMes = obtenerPolizasVencenEsteMes();
-    tablaEsteMes.innerHTML = construirFilasTabla(listaEsteMes);
+// Búsqueda y agrupación por similitudes corporativas
+function buscarGruposEmpresas() {
+    const inputBusqueda = document.getElementById("inputBusquedaEmpresas");
+    const contenedorTarjetas = document.getElementById("contenedor-tarjetas-empresas");
+    const mensajeVacio = document.getElementById("mensaje-sin-empresas");
+    const btnLimpiar = document.getElementById("btnClearSearchEmpresas");
 
-    // 2. Dibujar pólizas que vencen EL PRÓXIMO MES
-    const listaProximoMes = obtenerPolizasVencenProximoMes();
-    tablaProximoMes.innerHTML = construirFilasTabla(listaProximoMes);
+    if (!contenedorTarjetas) return;
+
+    const textoBusqueda = inputBusqueda ? inputBusqueda.value.toLowerCase().trim() : "";
+
+    if (btnLimpiar) {
+        btnLimpiar.style.display = textoBusqueda !== "" ? "block" : "none";
+    }
+
+    // Si no hay texto de búsqueda, limpiamos la vista
+    if (textoBusqueda === "") {
+        contenedorTarjetas.innerHTML = "";
+        if (mensajeVacio) mensajeVacio.style.display = "none";
+        return;
+    }
+
+    if (typeof polizas === "undefined" || polizas.length === 0) {
+        contenedorTarjetas.innerHTML = "";
+        if (mensajeVacio) mensajeVacio.style.display = "block";
+        return;
+    }
+
+    // Extraer y agrupar empresas únicas analizando tanto 'solicitante' como 'cliente'
+    const mapaEmpresas = new Map();
+
+    polizas.forEach(p => {
+        // Revisar Solicitante
+        const sol = String(p.solicitante || "").trim();
+        const rucSol = String(p.cedulaRuc1 || "").trim();
+        if (sol && (esRucEmpresaValido(rucSol) || esNombreEmpresaCoherente(sol))) {
+            const clave = sol.toLowerCase();
+            if (!mapaEmpresas.has(clave)) {
+                mapaEmpresas.set(clave, {
+                    nombre: sol,
+                    ruc: rucSol || "RUC no especificado",
+                    rol: "Solicitante",
+                    clientesVinculados: []
+                });
+            }
+            mapaEmpresas.get(clave).clientesVinculados.push(p);
+        }
+
+        // Revisar Cliente (por si la empresa figura directamente como cliente)
+        const cli = String(p.cliente || "").trim();
+        const rucCli = String(p.cedulaRuc || "").trim();
+        if (cli && (esRucEmpresaValido(rucCli) || esNombreEmpresaCoherente(cli))) {
+            const clave = cli.toLowerCase();
+            if (!mapaEmpresas.has(clave)) {
+                mapaEmpresas.set(clave, {
+                    nombre: cli,
+                    ruc: rucCli || "RUC no especificado",
+                    rol: "Cliente",
+                    clientesVinculados: []
+                });
+            }
+            // Evitar duplicar la misma póliza si ya fue agregada
+            const empresaObj = mapaEmpresas.get(clave);
+            if (!empresaObj.clientesVinculados.some(item => item.numeroPoliza === p.numeroPoliza)) {
+                empresaObj.clientesVinculados.push(p);
+            }
+        }
+    });
+
+    // Filtrar por similitud con el texto ingresado
+    const empresasFiltradas = [];
+    mapaEmpresas.forEach((val) => {
+        if (val.nombre.toLowerCase().includes(textoBusqueda) || val.ruc.includes(textoBusqueda)) {
+            empresasFiltradas.push(val);
+        }
+    });
+
+    if (empresasFiltradas.length === 0) {
+        contenedorTarjetas.innerHTML = "";
+        if (mensajeVacio) mensajeVacio.style.display = "block";
+        return;
+    }
+
+    if (mensajeVacio) mensajeVacio.style.display = "none";
+
+    // Renderizar tarjetas con similitudes corporativas
+    contenedorTarjetas.innerHTML = empresasFiltradas.map((emp, idx) => `
+        <div class="tarjeta-empresa-item" onclick='abrirModalEmpresa(${JSON.stringify(emp)})'>
+            <div class="nombre-empresa-titulo">${emp.nombre}</div>
+            <div class="ruc-empresa-sub">RUC: ${emp.ruc}</div>
+            <span class="badge-rol-empresa ${emp.rol === 'Solicitante' ? 'badge-rol-solicitante' : 'badge-rol-cliente'}">
+                Rol Principal: ${emp.rol} (${emp.clientesVinculados.length} pólizas asociadas)
+            </span>
+        </div>
+    `).join("");
+}
+
+function limpiarBusquedaEmpresas() {
+    const inputBusqueda = document.getElementById("inputBusquedaEmpresas");
+    const contenedorTarjetas = document.getElementById("contenedor-tarjetas-empresas");
+    const mensajeVacio = document.getElementById("mensaje-sin-empresas");
+    const btnLimpiar = document.getElementById("btnClearSearchEmpresas");
+
+    if (inputBusqueda) inputBusqueda.value = "";
+    if (contenedorTarjetas) contenedorTarjetas.innerHTML = "";
+    if (mensajeVacio) mensajeVacio.style.display = "none";
+    if (btnLimpiar) btnLimpiar.style.display = "none";
+}
+
+// Abrir modal centralizado con el detalle de la empresa seleccionada
+function abrirModalEmpresa(empresaData) {
+    const modal = document.getElementById("modal-detalle-empresa");
+    const titulo = document.getElementById("modal-empresa-titulo");
+    const subtipo = document.getElementById("modal-empresa-subtipo");
+    const cuerpoTabla = document.getElementById("tabla-empresa-cuerpo");
+
+    if (!modal || !cuerpoTabla) return;
+
+    if (titulo) titulo.textContent = empresaData.nombre;
+    if (subtipo) subtipo.innerHTML = `<strong>RUC:</strong> ${empresaData.ruc} &nbsp;|&nbsp; <strong>Rol:</strong> ${empresaData.rol} &nbsp;|&nbsp; <strong>Total Pólizas Vinculadas:</strong> ${empresaData.clientesVinculados.length}`;
+
+    let filas = "";
+    empresaData.clientesVinculados.forEach(p => {
+        const clienteVinculado = p.cliente || "Sin Nombre";
+        const cedulaCli = p.cedulaRuc || "N/A";
+        const tipoSeguro = p.tipoPoliza || "N/A";
+        const numPoliza = p.numeroPoliza || "N/A";
+        const aseguradora = p.aseguradora || "N/A";
+
+        filas += `
+            <tr>
+                <td><strong>${clienteVinculado}</strong></td>
+                <td>${cedulaCli}</td>
+                <td>${tipoSeguro}</td>
+                <td>${numPoliza}</td>
+                <td>${aseguradora}</td>
+            </tr>
+        `;
+    });
+
+    cuerpoTabla.innerHTML = filas;
+    modal.classList.remove("modal-oculto");
+}
+
+function cerrarModalEmpresa() {
+    const modal = document.getElementById("modal-detalle-empresa");
+    if (modal) {
+        modal.classList.add("modal-oculto");
+    }
 }
 
 // Función auxiliar para construir la estructura HTML de cada fila (<tr>)
@@ -785,9 +943,9 @@ function renderizarHistorialCompleto() {
     // REGLA DE VISTA LIMPIA: Si no se ha escrito nada en la búsqueda, 
     // no se ha elegido un tipo de seguro específico, ni se ha presionado ninguna letra del abecedario,
     // Ocultamos por completo tanto el resumen de tarjetas como la tabla principal.
-    const hayFiltroActivo = (tipoSeleccionado !== "TODOS" && tipoSeleccionado !== "") || 
-                          (textoBusqueda !== "") || 
-                          (letraSeleccionadaHistorial !== null);
+    const hayFiltroActivo = (tipoSeleccionado !== "TODOS" && tipoSeleccionado !== "") ||
+        (textoBusqueda !== "") ||
+        (letraSeleccionadaHistorial !== null);
 
     if (!hayFiltroActivo) {
         if (contenedorResumen) contenedorResumen.classList.add("pantalla-oculta");
@@ -996,8 +1154,8 @@ function renderizarResumenGeneral() {
     if (!contenedorGrid) return;
 
     const nombresMeses = [
-        "Enero", "Febrero", "Marzo", "Abril", 
-        "Mayo", "Junio", "Julio", "Agosto", 
+        "Enero", "Febrero", "Marzo", "Abril",
+        "Mayo", "Junio", "Julio", "Agosto",
         "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ];
 
@@ -1031,7 +1189,7 @@ function abrirModalMes(numeroMes, nombreMes) {
     const polizasDelMes = listaPolizas.filter(p => {
         const fechaFinStr = p.finVigencia || p.fechaFin || "";
         if (!fechaFinStr) return false;
-        
+
         const partes = fechaFinStr.split("-");
         if (partes.length >= 2) {
             const mesPoliza = parseInt(partes[1], 10);
